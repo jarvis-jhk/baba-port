@@ -1,6 +1,7 @@
 # Status
 
-Living plan. Update when a step finishes.
+Living plan. Update when a step finishes. Priorities: `ROADMAP.md`;
+maintainer log: `NOTES.md` (JARVIS owns the project since 2026-10-18).
 
 ## Milestones
 
