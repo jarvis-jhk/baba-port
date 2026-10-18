@@ -13,6 +13,8 @@ State of the code: `docs/STATUS.md`; priorities: `ROADMAP.md`.
 - Private Android builds (`scripts/android/private.sh --publish`) go to the
   owner's update channel after every build; the versionCode counter is in
   `tools/android/private-build-code`.
+- Published private build 0.1.0+p2 (versionCode 10002, icon + fault
+  reports); CI on the pushed HEAD to be watched by the next session.
 - Asked the `self` lane for the JARVIS side of the handoff (memory file,
   JARVIS.md entry, schedules).
 - Waiting on the owner: nothing yet. To ask in one batch later: tablet test
