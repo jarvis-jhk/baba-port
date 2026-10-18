@@ -44,9 +44,13 @@ linux)
     P="$V/baba-port-$VERSION"
     [ -x "$P/play.sh" ] && [ -x "$P/baba-port" ] || fail "play.sh / baba-port missing or not executable"
     "$P/play.sh" --version | tee "$V/version.txt" | grep -q "baba-port $VERSION" || fail "--version"
-    ldd "$P/baba-port" | grep -E 'SDL2|not found' | tee "$V/ldd.txt"
+    # Resolve like play.sh does: a bundled lib/ comes first (CI runners have
+    # no system SDL2, so a plain ldd would report it missing).
+    LDP=${LD_LIBRARY_PATH:-}
+    [ -d "$P/lib" ] && LDP="$P/lib${LDP:+:$LDP}"
+    LD_LIBRARY_PATH="$LDP" ldd "$P/baba-port" | grep -E 'SDL2|not found' | tee "$V/ldd.txt"
     if [ -d "$P/lib" ]; then
-        LD_LIBRARY_PATH="$P/lib" ldd "$P/baba-port" | grep -q "$P/lib/libSDL2" || fail "bundled SDL2 not used"
+        grep -q "$P/lib/libSDL2" "$V/ldd.txt" || fail "bundled SDL2 not used"
     fi
     grep -q 'not found' "$V/ldd.txt" && fail "unresolved libraries"
     echo "glibc needed: $(pkg_max_glibc "$P/baba-port")"
