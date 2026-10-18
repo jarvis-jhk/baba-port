@@ -338,6 +338,12 @@ Living plan. Update when a step finishes.
       into `.github/workflows/build.yml`.
       Next: title/HUD layout for 4:3/1:1 (M5), soft keyboard for slot
       names, first CI run for macOS, the `gameboy` check (M12).
+      Launcher icon with Baba (2026-10-18): made at build time from the
+      local install for private builds only (`scripts/android/private.sh`,
+      `--game-icon`; releases keep the default icon); private builds also
+      report panics/failed starts (`crash.rs`). versionCode scheme now
+      ×100 (+ private counter). Not seen on a device yet (no device in this
+      worker's scope); aapt2 reads the resources. `docs/platform-android.md`.
 - [ ] M11 Packaging, CI, README and player docs, no-game-data check.
       Public release only when the owner says so.
       Done 2026-10-18 (all local, nothing published or pushed):

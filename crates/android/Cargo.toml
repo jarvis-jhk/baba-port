@@ -20,6 +20,7 @@ baba-port = { path = "../game", default-features = false }
 baba-render = { path = "../render", default-features = false }
 baba-platform = { path = "../platform", default-features = false, features = ["android"] }
 baba-net = { path = "../net" }
+baba-http = { path = "../http" }
 log = "0.4"
 
 [dev-dependencies]

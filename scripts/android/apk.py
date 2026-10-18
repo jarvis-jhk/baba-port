@@ -17,7 +17,8 @@ Usage:
   apk.py build --out app.apk --package org.x --label X --lib-name foo \
       --so lib/arm64-v8a/libfoo.so=path/to/libfoo.so [--asset name=path ...] \
       --key-dir DIR [--version-code N] [--version-name S] [--min-sdk 26] \
-      [--target-sdk 35] [--orientation sensorLandscape] [--extract-native-libs]
+      [--target-sdk 35] [--orientation sensorLandscape] [--extract-native-libs] \
+      [--icon-fg fg.png --icon-bg bg.png]
   apk.py verify app.apk      # re-checks the v2 signature (no apksigner needed)
   apk.py dump-manifest app.apk
 """
@@ -41,7 +42,8 @@ ATTR_IDS = {
     "value": 0x01010024, "mimeType": 0x01010026, "minSdkVersion": 0x0101020C, "versionCode": 0x0101021B,
     "versionName": 0x0101021C, "targetSdkVersion": 0x01010270, "glEsVersion": 0x01010281,
     "required": 0x0101028E, "isGame": 0x010103F4, "extractNativeLibs": 0x010104EA,
-    "resizeableActivity": 0x010104F6, "appCategory": 0x01010545,
+    "resizeableActivity": 0x010104F6, "appCategory": 0x01010545, "drawable": 0x01010199,
+    "roundIcon": 0x0101052C,
 }
 THEME_BLACK_NOTITLEBAR_FULLSCREEN = 0x0103000A  # @android:style/Theme.Black.NoTitleBar.Fullscreen
 ORIENTATIONS = {"unspecified": -1, "landscape": 0, "portrait": 1, "user": 2, "sensor": 4,
@@ -70,6 +72,8 @@ def manifest_tree(a):
                  A("appCategory", 0), A("extractNativeLibs", bool(a.extract_native_libs))]
     if a.debuggable:
         app_attrs.append(A("debuggable", True))
+    if a.icon_fg:
+        app_attrs += [A("icon", Ref(RES_ICON)), A("roundIcon", Ref(RES_ICON))]
     activity = ("activity", [
         A("name", "android.app.NativeActivity"), A("label", a.label), A("exported", True),
         A("theme", Ref(THEME_BLACK_NOTITLEBAR_FULLSCREEN)),
@@ -210,6 +214,76 @@ def decode_axml(buf):
 
 
 # ---------------------------------------------------------------- zip
+
+# ---------------------------------------------------------------- resources (launcher icon)
+
+# The app's only resources: an adaptive icon (res/mipmap/ic_launcher.xml) with
+# a foreground and a background bitmap (res/mipmap-nodpi/: never rescaled at
+# load, the adaptive icon scales its layers itself). Type "mipmap" = 1 in
+# package 0x7f, so the IDs are 0x7f01000N.
+RES_ICON, RES_FG, RES_BG = 0x7F010000, 0x7F010001, 0x7F010002
+ICON_XML, ICON_FG, ICON_BG = ("res/mipmap/ic_launcher.xml", "res/mipmap-nodpi/ic_launcher_fg.png",
+                              "res/mipmap-nodpi/ic_launcher_bg.png")
+
+
+def adaptive_icon_xml():
+    A = lambda name, v: (name, v, True)  # noqa: E731
+    return encode_axml(("adaptive-icon", [], [
+        ("background", [A("drawable", Ref(RES_BG))], []),
+        ("foreground", [A("drawable", Ref(RES_FG))], []),
+    ]))
+
+
+def string_pool_utf8(strings):
+    data, offs = b"", []
+    for s in strings:
+        offs.append(len(data))
+        u = s.encode()
+        if len(s) >= 0x80 or len(u) >= 0x80:
+            raise SystemExit("resource string too long: " + s)
+        data += bytes([len(s), len(u)]) + u + b"\0"
+    while len(data) % 4:
+        data += b"\0"
+    start = 28 + 4 * len(strings)
+    return struct.pack("<HHIIIIII", 0x0001, 28, start + len(data), len(strings), 0, 0x100,
+                       start, 0) + b"".join(struct.pack("<I", o) for o in offs) + data
+
+
+def resource_table(package):
+    """resources.arsc (ResTable) with the three icon entries."""
+    keys = ["ic_launcher", "ic_launcher_fg", "ic_launcher_bg"]
+    values = string_pool_utf8([ICON_XML, ICON_FG, ICON_BG])
+    NO_ENTRY = 0xFFFFFFFF
+
+    def type_chunk(density, present):
+        # ResTable_config: 64 bytes, density at offset 14 (0 = any, 0xFFFF = nodpi).
+        config = bytearray(64)
+        struct.pack_into("<I", config, 0, 64)
+        struct.pack_into("<H", config, 14, density)
+        offs, entries = [], b""
+        for i in range(len(keys)):
+            if i not in present:
+                offs.append(NO_ENTRY)
+                continue
+            offs.append(len(entries))
+            # ResTable_entry (size 8, flags 0, key) + Res_value (string = path)
+            entries += struct.pack("<HHI", 8, 0, i) + struct.pack("<HBBI", 8, 0, T_STRING, i)
+        hdr = 20 + len(config)
+        start = hdr + 4 * len(keys)
+        return (struct.pack("<HHIBBHII", 0x0201, hdr, start + len(entries), 1, 0, 0, len(keys), start)
+                + bytes(config) + b"".join(struct.pack("<I", o) for o in offs) + entries)
+
+    # typeSpec flags: the bitmaps exist in a density config (CONFIG_DENSITY).
+    spec = struct.pack("<HHIBBHI", 0x0202, 16, 16 + 4 * len(keys), 1, 0, 0, len(keys)) + struct.pack(
+        "<III", 0, 0x0100, 0x0100)
+    type_strings, key_strings = string_pool_utf8(["mipmap"]), string_pool_utf8(keys)
+    name = package.encode("utf-16-le")[:254].ljust(256, b"\0")
+    hdr = 288
+    body = (type_strings + key_strings + spec + type_chunk(0, {0}) + type_chunk(0xFFFF, {1, 2}))
+    pkg = struct.pack("<HHII", 0x0200, hdr, hdr + len(body), 0x7F) + name + struct.pack(
+        "<IIIII", hdr, 1, hdr + len(type_strings), len(keys), 0) + body
+    return struct.pack("<HHII", 0x0002, 12, 12 + len(values) + len(pkg), 1) + values + pkg
+
 
 def write_zip(entries):
     """entries: [(name, bytes, compress, align)] -> zip bytes (deterministic)."""
@@ -367,6 +441,8 @@ def main():
                    help="fail instead of creating a key when --key-dir has none (release key)")
     b.add_argument("--file", action="append", default=[],
                    help="apk/path=local/path, deflated (licence texts)")
+    b.add_argument("--icon-fg", help="launcher icon foreground PNG (432x432, scripts/android/icon.py)")
+    b.add_argument("--icon-bg", help="launcher icon background PNG")
     b.add_argument("--key-algo", choices=["ec", "rsa"], default="ec")
     b.add_argument("--version-code", default="1")
     b.add_argument("--version-name", default="dev")
@@ -395,6 +471,14 @@ def main():
         return
 
     entries = [("AndroidManifest.xml", encode_axml(manifest_tree(a)), True, 4)]
+    if bool(a.icon_fg) != bool(a.icon_bg):
+        raise SystemExit("--icon-fg and --icon-bg go together")
+    if a.icon_fg:
+        # resources.arsc must be stored and 4-byte aligned (targetSdk >= 30).
+        entries += [("resources.arsc", resource_table(a.package), False, 4),
+                    (ICON_XML, adaptive_icon_xml(), True, 4),
+                    (ICON_FG, open(a.icon_fg, "rb").read(), False, 4),
+                    (ICON_BG, open(a.icon_bg, "rb").read(), False, 4)]
     for spec in a.so:
         name, path = spec.split("=", 1)
         entries.append((name, open(path, "rb").read(), a.extract_native_libs, 16384))

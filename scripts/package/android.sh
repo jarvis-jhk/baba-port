@@ -44,6 +44,9 @@ FILES=""
 for f in LICENSE-MIT LICENSE-APACHE THIRD_PARTY_NOTICES.md RUST_DEPENDENCIES.txt; do
     FILES="$FILES licenses/$f=$STAGE/$f"
 done
+# A release never carries the private fault-report endpoint (crates/android/src/crash.rs)
+# nor a game-art icon (scripts/android/private.sh).
+unset BABA_REPORT_URL
 APK_KEY_DIR="$KEY_DIR" APK_REQUIRE_KEY=$REQUIRE APK_FILES="$FILES" \
     VERSION_CODE="$CODE" VERSION_NAME="$VERSION" scripts/android/build.sh >/dev/null
 mkdir -p "$DIST"

@@ -252,11 +252,44 @@ scripts/android/deploy.sh install start shot log   # tablet (APP=probe for the p
 - The certificate's SHA-256 fingerprint (printed by `release-key.sh` and in
   the CI log) should go into the release notes so players can check the APK
   (`apksigner verify --print-certs`, or any APK inspector).
-- versionCode = MAJOR·10000 + MINOR·100 + PATCH of the Cargo version
-  (`scripts/package/common.sh`), versionName = the version. The APK
+- versionCode = (MAJOR·10000 + MINOR·100 + PATCH)·100 of the Cargo version
+  (`scripts/package/common.sh`; v0.1.0 still shipped as 100), versionName
+  = the version. The last two digits count private builds (below). The APK
   carries the licence texts under `licenses/` (deflated, ~35 KB).
 - Not chosen: Play App Signing (no Play Store plans), v1/v3 schemes (minSdk
   26 only needs v2; key rotation via v3 can be added later if ever needed).
+
+## Launcher icon and private builds (2026-10-18)
+
+The launcher icon shows Baba, but Baba is game art: it cannot be in git
+or in a public release, and a launcher icon cannot come from data the app
+imports at run time (Android reads it from the APK's resources). So it is
+made at **build time** from a local install, for private builds only:
+
+- `scripts/android/icon.py GAME OUT` (stdlib): Baba's sprite
+  (`baba_0_1.png`) tinted with its default-palette colour, scaled up
+  (nearest) into the adaptive icon's 66 dp safe circle on a 432 px
+  foreground, plus a background layer in the level background colour.
+- `apk.py --icon-fg/--icon-bg`: a hand-written `resources.arsc` (package
+  0x7f, type `mipmap`: `ic_launcher` = adaptive-icon XML, the two PNGs in
+  `nodpi`) and `android:icon`/`roundIcon` on the application. About 2.7 KB
+  in the APK. Checked with Google's `aapt2 dump resources/badging/xmltree`.
+- `build.sh --game-icon[=DIR]` runs both; `scripts/android/private.sh
+  [--publish]` is the owner's build: release key, game icon, fault reports
+  (below), versionCode = release code + a counter (01..99, kept in
+  `tools/android/private-build-code`), versionName `<version>+pN`;
+  `--publish` uploads to the owner's update channel (URL in the
+  git-ignored `keys/apkup-url`). `scripts/package/android.sh` (releases, CI)
+  passes neither, so public APKs keep the default icon.
+
+## Fault reports (private builds)
+
+`crates/android/src/crash.rs`: with `BABA_REPORT_URL` set at compile time
+(`private.sh` reads `keys/report-url`, git-ignored; releases unset it) a
+panic is written to `files/crash-report.json` by the panic hook and posted
+(fire-and-forget, background thread) at the next start, then removed; a
+failed start (window, renderer, game) is posted the same way. The report
+has the version, device model, API level and the message only.
 
 ## What the probe proves (tablet, 2026-10-18)
 

@@ -20,6 +20,7 @@
 //! HTTPS at start (TLS check); `debug.babaport.losectx 1` drops the GL
 //! context whenever the window goes away (context-loss path).
 
+pub mod crash;
 pub mod screen;
 pub mod zip_paths;
 
@@ -39,7 +40,7 @@ mod entry {
     use baba_platform::{DeviceId, Event, Platform, WindowConfig};
     use baba_render::Renderer;
 
-    use crate::{data, logcat, screen};
+    use crate::{crash, data, logcat, screen};
 
     /// One HTTPS request to the Warpzone server's public info (no account,
     /// no identity file).
@@ -129,11 +130,21 @@ mod entry {
             log::error!("no app data directory");
             return;
         };
+        crash::init(
+            dirs.internal.clone(),
+            format!(
+                "baba-port {} android {} (API {})",
+                env!("CARGO_PKG_VERSION"),
+                system_property("ro.product.model").unwrap_or_default(),
+                AndroidApp::sdk_version()
+            ),
+        );
         let intent = data::intent_file(&app);
         let (mut p, gl) = match AndroidPlatform::new(app, &WindowConfig::default()) {
             Ok(x) => x,
             Err(e) => {
                 log::error!("{e}");
+                crash::report("Android start failed (window)", &e.to_string());
                 return;
             }
         };
@@ -141,6 +152,7 @@ mod entry {
             Ok(r) => r,
             Err(e) => {
                 log::error!("renderer: {e}");
+                crash::report("Android start failed (renderer)", &e.to_string());
                 return;
             }
         };
@@ -174,6 +186,7 @@ mod entry {
             Ok(a) => a,
             Err(e) => {
                 log::error!("game: {e}");
+                crash::report("Android start failed (game)", &e.to_string());
                 return;
             }
         };

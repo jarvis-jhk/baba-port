@@ -95,6 +95,7 @@ name = "baba-android"
 version = "0.1.0"
 dependencies = [
  "baba-formats",
+ "baba-http",
  "baba-net",
  "baba-platform",
  "baba-port",

@@ -12,12 +12,14 @@ pkg_version() {
     sed -n '/^\[workspace\.package\]/,/^\[/{s/^version *= *"\(.*\)"/\1/p;}' "$BABA_ROOT/Cargo.toml" | head -1
 }
 
-# Android versionCode from the version: MAJOR*10000 + MINOR*100 + PATCH
-# (0.1.0 -> 100; must only ever grow).
+# Android versionCode from the version: (MAJOR*10000 + MINOR*100 + PATCH)*100
+# (0.1.1 -> 10100; must only ever grow). The last two digits are 00 for a
+# release and count private builds of that version (scripts/android/private.sh).
+# v0.1.0 shipped with the old scheme (100).
 pkg_version_code() {
     local v=${1%%-*} IFS=.
     set -- $v
-    echo $(( ${1:-0} * 10000 + ${2:-0} * 100 + ${3:-0} ))
+    echo $(( (${1:-0} * 10000 + ${2:-0} * 100 + ${3:-0}) * 100 ))
 }
 
 # Timestamp for reproducible archives: $SOURCE_DATE_EPOCH (CI: the commit
