@@ -89,7 +89,7 @@ jobs:
           path: tools/windows/downloads
           key: windows-toolchain-${{ hashFiles('scripts/windows/fetch-toolchain.sh') }}
       - run: scripts/windows/fetch-toolchain.sh
-      - name: Cross-build, package, check (no Wine on the runner: static checks)
+      - name: "Cross-build, package, check (no Wine on the runner: static checks)"
         run: |
           export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
           export BABA_BUILD_ID=$(git describe --tags --always --dirty)
