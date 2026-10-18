@@ -76,10 +76,11 @@ MAGIC = [
     (b"8BPS", "Photoshop image"),
 ]
 # Lua source: lines typical of Lua and rare elsewhere (character classes so
-# that this file does not match itself).
+# that this file does not match itself; no ';' before then/do, so shell's
+# `if ...; then` and `for ...; do` do not count).
 LUA_LINE = re.compile(
     rb"^\s*(local\s+function\s+\w|function\s+[\w.:]+\s*\(.*\)\s*$|end\s*$|"
-    rb"elseif\s.*\st[h]en\s*$|if\s.*\st[h]en\s*$|for\s.*\sd[o]\s*$|.*~=.*\st[h]en\s*$)",
+    rb"elseif\s[^;\n]*\st[h]en\s*$|if\s[^;\n]*\st[h]en\s*$|for\s[^;\n]*\sd[o]\s*$|[^;\n]*~=[^;\n]*\st[h]en\s*$)",
     re.M)
 LUA_GAME_WORDS = re.compile(rb"\b(MF_\w+|editor_objlist|tileslist|unitlists?|featureindex|"
                             rb"objectlist|generaldata\d?|mapdata|levelconversions)\b")
