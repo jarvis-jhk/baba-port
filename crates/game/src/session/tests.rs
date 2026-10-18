@@ -21,8 +21,10 @@ struct Data {
 }
 
 fn data() -> Option<Data> {
-    let Some(dir) = std::env::var_os("BABA_GAME_DIR") else {
-        eprintln!("skipping: no BABA_GAME_DIR");
+    let Some(dir) = std::env::var_os("BABA_GAME_DIR")
+        .filter(|d| std::path::Path::new(d).join("Data/values.lua").is_file())
+    else {
+        eprintln!("skipping: no install at BABA_GAME_DIR");
         return None;
     };
     let data = PathBuf::from(dir).join("Data");

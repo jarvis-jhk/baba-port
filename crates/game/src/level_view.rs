@@ -266,8 +266,10 @@ mod tests {
     /// with a sprite for every unit. Skips without `BABA_GAME_DIR`.
     #[test]
     fn every_level_builds_a_scene() {
-        let Some(dir) = std::env::var_os("BABA_GAME_DIR") else {
-            eprintln!("skipping: no BABA_GAME_DIR");
+        let Some(dir) = std::env::var_os("BABA_GAME_DIR")
+            .filter(|d| Path::new(d).join("Data/values.lua").is_file())
+        else {
+            eprintln!("skipping: no install at BABA_GAME_DIR");
             return;
         };
         let data = GameData::open(Path::new(&dir)).unwrap();

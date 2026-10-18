@@ -1140,8 +1140,10 @@ mod tests {
     /// without `BABA_GAME_DIR`.
     #[test]
     fn install_levels_round_trip() {
-        let Some(dir) = std::env::var_os("BABA_GAME_DIR") else {
-            eprintln!("skipping: no BABA_GAME_DIR");
+        let Some(dir) = std::env::var_os("BABA_GAME_DIR")
+            .filter(|d| Path::new(d).join("Data/values.lua").is_file())
+        else {
+            eprintln!("skipping: no install at BABA_GAME_DIR");
             return;
         };
         let data = Path::new(&dir).join("Data");

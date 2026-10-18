@@ -218,7 +218,9 @@ mod tests {
     /// (where the icon glyphs live). Skips without `BABA_GAME_DIR`.
     #[test]
     fn icon_code_points() {
-        let Some(dir) = std::env::var_os("BABA_GAME_DIR") else {
+        let Some(dir) = std::env::var_os("BABA_GAME_DIR")
+            .filter(|d| Path::new(d).join("Data/merged.ttf").is_file())
+        else {
             return;
         };
         let f = load(&Path::new(&dir).join("Data/merged.ttf")).expect("font");
