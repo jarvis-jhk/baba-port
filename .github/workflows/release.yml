@@ -23,7 +23,7 @@ jobs:
         with:
           persist-credentials: false
       - run: |
-          v=$(sed -n '/^\[workspace\.package\]/,/^\[/{s/^version *= *"\(.*\)"/\1/p}' Cargo.toml | head -1)
+          v=$(sed -n '/^\[workspace\.package\]/,/^\[/{s/^version *= *"\(.*\)"/\1/p;}' Cargo.toml | head -1)
           [ "${GITHUB_REF_NAME}" = "v$v" ] || { echo "::error::tag ${GITHUB_REF_NAME} != v$v (Cargo.toml)"; exit 1; }
       - run: scripts/check-no-game-data.sh
 

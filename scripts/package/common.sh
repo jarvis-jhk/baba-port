@@ -9,7 +9,7 @@ PY=python3
 # what the game shows (CARGO_PKG_VERSION, `baba-port --version`) and what a
 # release tag must say (v<version>).
 pkg_version() {
-    sed -n '/^\[workspace\.package\]/,/^\[/{s/^version *= *"\(.*\)"/\1/p}' "$BABA_ROOT/Cargo.toml" | head -1
+    sed -n '/^\[workspace\.package\]/,/^\[/{s/^version *= *"\(.*\)"/\1/p;}' "$BABA_ROOT/Cargo.toml" | head -1
 }
 
 # Android versionCode from the version: MAJOR*10000 + MINOR*100 + PATCH

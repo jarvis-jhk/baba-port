@@ -24,6 +24,7 @@ DEB="python3 -I scripts/portmaster/debfetch.py"
 OLD="--mirror http://archive.debian.org/debian --dist buster --arch arm64"
 NEW="--mirror http://deb.debian.org/debian --dist bookworm"
 rustup target add aarch64-unknown-linux-gnu >/dev/null
+mkdir -p $P
 
 if [ ! -f $P/sysroot/.done ]; then
     tmp=$(mktemp -d $P/unpack.XXXXXX)
