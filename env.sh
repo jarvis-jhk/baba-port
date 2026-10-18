@@ -10,6 +10,8 @@ export TMPDIR="$R/scratch/tmp"
 mkdir -p "$TMPDIR"
 export PATH="$R/tools/cargo/bin:$R/tools/venv/bin:$R/tools/bin:$PATH"
 # Location of the original game (read-only; never written to).
+# A read-only /data/baba (a sandboxed build worker) wins over the Steam default.
+if [ -z "${BABA_GAME_DIR:-}" ] && [ -d /data/baba ]; then BABA_GAME_DIR=/data/baba; fi
 export BABA_GAME_DIR="${BABA_GAME_DIR:-$HOME/.steam/steam/steamapps/common/Baba Is You}"
 # Dev: the port's user data dir (import, saves, settings, Warpzone identity) stays in the project.
 export BABA_PORT_DATA_DIR="$R/cache/userdata"
