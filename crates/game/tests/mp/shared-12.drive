@@ -1,0 +1,80 @@
+# M6 mode 2 (shared save) with twelve virtual controllers: twelve views
+# on one save; P1 clears 1level and every other map shows it at once.
+# Screenshots of the twelve-view layout at 1920x1080 and 640x480, and
+# the zoom.
+size 1920x1080
+# The first launch plays the intro: hold a key to skip it.
+wait 150
+hold enter 70
+idle 400
+solve
+idle 900
+key escape
+key down 3
+key enter
+idle
+key down 4
+key enter
+pads 12
+pad 1 a
+pad 2 a
+pad 3 a
+pad 4 a
+pad 5 a
+pad 6 a
+pad 7 a
+pad 8 a
+pad 9 a
+pad 10 a
+pad 11 a
+pad 12 a
+pad 1 up 5
+pad 1 right
+expect state join SharedSave players=12
+pad 1 a
+pad 2 a
+pad 3 a
+pad 4 a
+pad 5 a
+pad 6 a
+pad 7 a
+pad 8 a
+pad 9 a
+pad 10 a
+pad 11 a
+pad 12 a
+wait 50
+expect state multi SharedSave players=12 views=12
+idle
+p2 walk 1level
+p3 press up
+p4 press right
+p5 press up
+p6 press pause
+shot 01-shared-12-1080p
+size 640x480
+shot 02-shared-12-640x480
+size 1920x1080
+p6 press back
+p1 walk 1level
+p1 press wait
+p1 idle
+p1 solve
+wait 10
+p2 expect icon 1level 3
+p7 expect icon 1level 3
+p12 expect icon 1level 3
+shot 03-shared-12-p1-won
+p1 idle 900
+pad 1 back
+shot 04-shared-12-focus-p1
+size 640x480
+shot 05-shared-12-focus-640x480
+size 1920x1080
+pad 1 back
+p1 press pause
+p1 press down 3
+p1 press wait
+idle
+expect state title
+quit

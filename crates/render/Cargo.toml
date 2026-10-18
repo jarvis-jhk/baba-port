@@ -1,0 +1,18 @@
+[package]
+name = "baba-render"
+description = "baba-port renderer: OpenGL ES 2.0-level sprite/tile renderer on glow, headless (EGL) capable"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[features]
+default = ["headless"]
+# Offscreen GL context through EGL (Mesa surfaceless / pbuffer), loaded at run time.
+headless = ["dep:khronos-egl"]
+
+[dependencies]
+glow = "0.18"
+png = "0.18"
+log = "0.4"
+khronos-egl = { version = "6", features = ["dynamic"], optional = true }

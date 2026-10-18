@@ -1,0 +1,11 @@
+[package]
+name = "baba-progress"
+description = "baba-port save model and progression: slots, settings, map unlocking, counters, level tree"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+baba-formats = { path = "../formats" }
+log = "0.4"

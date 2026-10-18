@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<gameList>
+  <game>
+    <path>./Baba Is You.sh</path>
+    <name>@TITLE@</name>
+    <desc>@DESC@</desc>
+    <developer>Hempuli Oy (game), baba-port (port)</developer>
+    <publisher>Hempuli Oy</publisher>
+    <genre>Puzzle</genre>
+    <players>1-12</players>
+  </game>
+</gameList>

@@ -1,0 +1,123 @@
+# M8: help, a tutorial lesson with its demo edits, the shortcut list,
+# then editing with a gamepad (cursor, place, copy, alt combos, quickbar,
+# palette, quick menu) and by touch. Runs after 1-create.drive on the same
+# data dir (the intro tutorial was seen; levels/0level is "Drive test").
+size 854x480
+idle 300
+expect state title menu=Main
+key down
+key enter
+wait 5
+expect state menu=Editor(Start)
+shot 30-start
+key down 4
+key enter
+expect state menu=Editor(Help)
+shot 31-help
+key down 3
+key enter
+expect state menu=Editor(Tutorials)
+shot 32-tutorials
+key down 4
+key enter
+expect log tutorial 3
+expect state editor Main level=levels/_tutorial_
+shot 33-lesson3-1
+key enter 4
+expect state on=baba
+shot 34-lesson3-5-line
+key enter 2
+shot 35-lesson3-7-fillrect
+key escape
+expect log tutorial end
+expect state menu=Editor(Tutorials)
+key down
+key enter
+expect state menu=Editor(Hotkeys
+shot 36-hotkeys
+key escape
+key escape
+key escape
+expect state menu=Editor(Start)
+key enter
+key down 2
+key enter
+wait 2
+expect state editor Main level=levels/0level
+expect state cursor=8,5
+
+# Gamepad: the d-pad moves the cursor, X copies, A places, B undoes.
+pad right
+pad down
+expect state cursor=9,6 on=flag
+pad x
+expect state pick=flag
+pad up 2
+pad a
+expect state undo=1
+expect state on=flag
+shot 37-pad-placed
+pad b
+expect state undo=0
+expect state on=-
+# Alt (held Select) + A = swap: flag → its word.
+pad select+a
+expect state pick=text_flag
+# Quickbar and tool shoulders.
+pad rb
+expect state q=
+pad select+rb
+expect state pick=empty
+trigger r
+expect state tool=Line
+trigger l
+expect state tool=Pen
+# The palette (Y): the d-pad moves, A picks and returns.
+pad y
+expect state editor Palette
+shot 38-pad-palette
+pad a
+expect state editor Main
+# Quick menu (Start), closed with B.
+pad start
+expect state menu=Editor(QuickMenu)
+shot 39-quickmenu
+pad b
+expect state editor Main
+
+# Touch: a finger on a cell places the picked object.
+key 2
+touchcell 7 7
+expect state undo=1
+shot 40-touch
+key ctrl+z
+expect state undo=0
+
+# Select tool: lift BABA IS YOU, turn it, paste it elsewhere; undo both.
+click 835 274
+expect state tool=Select
+paint 2 2 4 2
+expect state selection
+expect state undo=1
+key right
+cell 13 3
+expect state undo=2
+shot 41-pasted
+key ctrl+z
+key ctrl+z
+expect state undo=0
+# Flood fill an empty area with baba, then undo it.
+click 835 310
+expect state tool=Fill
+key 2
+cell 14 7
+expect state undo=1
+shot 42-filled
+key ctrl+z
+expect state undo=0
+# F: show directions.
+key f
+shot 43-dirs
+key f
+click 835 130
+expect state tool=Pen

@@ -1,0 +1,38 @@
+# Android platform probe (NativeActivity, no Java): fullscreen GLES2 via EGL +
+# glow, AAudio beep, touch/gamepad logging. Built by scripts/android/build.sh.
+# Its own workspace (not a member of the main one: crates/*).
+[package]
+name = "baba-android-probe"
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[lib]
+name = "babaprobe"
+crate-type = ["cdylib"]
+path = "src/lib.rs"
+
+[target.'cfg(target_os = "android")'.dependencies]
+android-activity = { version = "0.6.1", features = ["native-activity"] }
+ndk = { version = "0.9", default-features = false, features = ["audio", "api-level-26"] }
+ndk-sys = "0.6"
+glow = "0.18"
+log = "0.4"
+libc = "0.2"
+jni-sys = "0.3"
+
+[workspace]
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+# Virtual gamepad for the tablet (root): /dev/uinput device with the Xbox 360
+# controller's USB ids, so Android classifies it as a real external gamepad.
+[[bin]]
+name = "padsim"
+path = "src/bin/padsim.rs"

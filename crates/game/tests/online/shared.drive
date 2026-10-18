@@ -1,0 +1,44 @@
+# M7 online, mode 2 (shared save): every player has an own instance on the
+# host's save, on every machine. Every machine's first player solves 0level
+# in its own instance; m0's first player then wins 1level and every other
+# machine's map shows it (progress event through the host, merged at the
+# player's next turn, the map refreshed by its own machine). Then everybody
+# presses at once; every machine must agree at the end.
+size 1280x720
+# The first launch plays the intro: hold a key to skip it.
+wait 150
+hold enter 70
+idle 400
+expect state play baba/0level
+@host online host private ${ROOMFILE}
+@m1 online join code ${ROOMFILE}
+@!m0,m1 online join invite ${ROOMFILE}
+@host online wait 90 machines=${MACHINES}
+@host online mode shared
+online seats ${LOCALS}
+@host shot 01-room
+online wait 90 online session
+online wait 60 players=${PLAYERS}
+online settle 30
+shot 02-session
+l1 idle 900
+l1 solve
+online wait-level 90 l1 baba/106level
+online settle 30
+@m0 l1 idle 900
+@m0 l1 walk 1level
+@m0 l1 press wait
+@m0 online wait-level 60 l1 baba/1level
+@m0 l1 idle 900
+@m0 l1 solve
+online wait-icon 90 l1 1level 3
+online settle 30
+shot 03-shared-progress
+online bots 8
+online settle 60
+shot 04-bots
+@host online end
+online wait 90 online room
+online expect agreed
+@host expect save 0 baba 1level 3
+quit

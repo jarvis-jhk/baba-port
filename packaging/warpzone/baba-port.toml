@@ -1,0 +1,82 @@
+# baba-port — a clean-room Rust reimplementation of Baba Is You (Hempuli
+# Oy, 2019).
+# Tier 2: the game links warpzone-core directly (crates/net): host screen,
+# room browser, codes, invite links, --warpzone-join/--warpzone-host, turn
+# streams over Warpzone's encrypted reliable peer channels (no rollback: Baba
+# is turn-based), host migration, up to 12 players in any mix of machines and
+# local controllers, plus spectators. Validate with
+#   scripts/net/dev-server.sh --check     (warpzone-server check-games packaging/warpzone)
+id = "baba-port"
+name = "Baba Is You (baba-port)"
+tagline = "The rule-pushing puzzle game, rebuilt: solve it together, up to 12 players on one screen or online."
+description = """
+An open-source, clean-room reimplementation of Baba Is You for Windows, Linux, macOS, Android and PortMaster handhelds. Every level, sprite, sound and piece of music is loaded from your own copy of the game; nothing of the original is included or downloaded.
+
+Up to twelve players in any mix of controllers and machines, in three ways to play: everyone pushing the same Baba through one level, each player on their own path through one shared save, or everyone in their own game side by side, just to share the experience. Undo and restart work for everybody.
+
+Warpzone brings public and private rooms, join codes, invite links, NAT traversal and spectators. If the host leaves, the others carry on with a new host."""
+homepage = "https://github.com/jarvis-jhk/baba-port"
+accent = "#d9396a"
+motif = "blocks"
+tier = 2
+local_players = 12
+third_party = false
+status = "in development"
+requires = "your own copy of Baba Is You (Steam, GOG, itch.io or the Humble Store) — baba-port reads its data at run time"
+
+[install]
+github = "jarvis-jhk/baba-port"
+prerelease = true
+checksums = "SHA256SUMS"
+# The release assets of scripts/package.sh (which checks these globs and
+# the exec paths below against the archives it builds). Android
+# (baba-port-*-android-arm64.apk) and macOS (baba-port-*-macos-universal.zip)
+# are on the release page too; the launcher's platform keys are linux,
+# appimage, windows, deck and portmaster (download only). The found game
+# data reaches the game as WARPZONE_DATA_BABA (crates/game/src/gamedir.rs).
+assets ={ linux = "baba-port-*-linux-x86_64.tar.gz", deck = "baba-port-*-linux-x86_64.tar.gz", windows = "baba-port-*-windows-x86_64.zip", portmaster = "baba-port-*-portmaster.zip" }
+
+[launch]
+# Linux: play.sh (bundled libraries, then exec the binary with every
+# argument). Windows: the exe with SDL2.dll beside it.
+exec = { linux = "baba-port-*/play.sh", deck = "baba-port-*/play.sh", windows = "baba-port-*/baba-port.exe" }
+join = ["--warpzone-join", "{room}"]
+host = ["--warpzone-host"]
+
+[rooms]
+# Members (machines): 12 players at most in any mix (12 machines × 1,
+# 1 machine × 12, 4 × 3, ...), counted by the game; the rest of the room is
+# for spectators.
+max_players = 16
+presets = [
+  { id = "coop", label = "co-op" },
+  { id = "shared", label = "shared save" },
+  { id = "own", label = "side by side" },
+]
+display = [
+  { key = "players", label = "Players" },
+  { key = "mode", label = "Mode" },
+  { key = "world", label = "World" },
+]
+
+# The launcher looks for a Baba Is You install (Steam libraries, GOG, Wine
+# prefixes, Downloads, ...) and hands it to the game as WARPZONE_DATA_BABA on
+# every start; baba-port reads the data from there at run time (the install
+# is never modified). Every build has Data/values.lua and Assets.dat side by
+# side: Windows with "Baba Is You.exe", Linux with bin64/Chowdren, macOS inside
+# "Baba Is You.app/Contents/Resources" (baba-port also accepts the .app or the
+# folder holding it).
+[[data]]
+id = "baba"
+label = "Baba Is You (Windows, Linux or macOS build)"
+description = "An installed copy of Baba Is You: the folder that contains Data/ (with values.lua, Worlds/, Sprites/). baba-port only reads it."
+files = ["Data/values.lua"]
+steam = ["Baba Is You"]
+gog = ["Baba Is You"]
+downloads = true
+discs = false
+buy = [
+  { label = "Steam", url = "https://store.steampowered.com/app/736260/Baba_Is_You/" },
+  { label = "GOG.com", url = "https://www.gog.com/game/baba_is_you" },
+  { label = "itch.io", url = "https://hempuli.itch.io/baba" },
+]

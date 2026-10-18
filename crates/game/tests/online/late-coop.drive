@@ -1,0 +1,29 @@
+# M7 online: late join (co-op). m0 and m1 start and play; m2 joins the
+# running session, replays the shared stream, then its player joins in.
+size 1280x720
+# The first launch plays the intro: hold a key to skip it.
+wait 150
+hold enter 70
+idle 400
+@host online host private ${ROOMFILE}
+@m1 online join code ${ROOMFILE}
+@host online wait 90 machines=2
+@host online mode coop
+@!m2 online seats ${LOCALS}
+@!m2 online wait 90 online session
+@!m2 online settle 30
+@host online touch ${STARTED}
+@!m2 online bots 4
+@m2 online wait-file ${STARTED} 120
+@m2 online join code ${ROOMFILE}
+@m2 online wait 60 online session
+@m2 online settle 30
+@m2 online seats ${LOCALS}
+online wait 60 players=${PLAYERS}
+online bots 4
+online settle 60
+shot 01-late-coop
+@host online end
+online wait 90 online room
+online expect agreed
+quit

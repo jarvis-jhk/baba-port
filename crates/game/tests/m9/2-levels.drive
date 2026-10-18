@@ -1,0 +1,126 @@
+# M9: Play levels. Level codes from the recorded server responses
+# (BABA_LEVELCODES_CACHE + BABA_LEVELCODES_OFFLINE=1: no network), saving
+# and playing a download, the featured list, errors, a custom level won
+# from the list, and a pack with Lua mods from the data dir (the Lua
+# notice). Runs after 1-import.drive on the same data dir, which
+# m9-test.sh seeds with a custom level (worlds/levels/0level) and a pack
+# with Lua (worlds/testpack).
+size 854x480
+idle 300
+expect state title menu=Main
+key down
+key right
+key enter
+expect state menu=Ext(PlayLevels)
+shot 10-playlevels
+key down
+key down
+key enter
+expect state menu=Ext(GetLevels)
+key enter
+expect state menu=Ext(EnterCode
+key 3
+key 8
+key t
+key c
+key 1
+key f
+key 2
+key g
+expect state text: "38TC1F2G"
+shot 11-entercode
+key enter
+wait 30
+expect state menu=Ext(Found)
+expect log downloaded 38TC-1F2G
+expect save settings get_d 0code 38TC-1F2G
+expect save settings get_d 0name STRANGERS
+shot 12-found
+key enter
+expect state menu=Ext(Saved
+expect log saved 38TC-1F2G as 1level
+shot 13-saved
+key enter
+idle 300
+expect state play levels/1level
+shot 14-downloaded-level
+key escape
+expect state menu=Pause
+shot 15-pause-single
+key down
+key enter
+idle 300
+expect state title menu=Ext(GetLevels)
+key down
+key enter
+wait 30
+expect state menu=Ext(Featured { page: 0 })
+expect log featured page 0 of 38 (6 levels)
+shot 16-featured
+key down
+key down
+shot 17-featured-3
+key escape
+expect state menu=Ext(GetLevels)
+key up
+key enter
+key z
+key z
+key z
+key z
+key 0
+key 0
+key 0
+key 0
+key enter
+wait 30
+expect state menu=Ext(Failed { list: false, err: "networkerror" })
+shot 18-error-network
+key escape
+expect state menu=Ext(GetLevels)
+key enter
+key a
+key b
+key enter
+expect state menu=Ext(Failed { list: false, err: "invalid" })
+key escape
+key escape
+key escape
+expect state menu=Ext(PlayLevels)
+key up
+key up
+key enter
+expect state menu=Ext(Custom { page: 0 })
+shot 19-custom
+key enter
+idle 300
+expect state play levels/0level
+moves RRRRRRRR
+idle 600
+expect log single win 0level
+expect save 2 levels 0level 3
+expect state title menu=Ext(Custom { page: 0 })
+key escape
+expect state menu=Ext(PlayLevels)
+key down
+key enter
+expect state menu=Packs
+key down
+key down
+key down
+key right
+key enter
+key up
+key up
+key up
+expect state menu=Packs { page: 1 } sel=(0, 0)
+shot 20-packs-page2
+key enter
+expect state menu=Ext(LuaNotice { pack: "testpack" })
+shot 21-lua-notice
+key enter
+idle 600
+expect log lua notice testpack
+expect state play testpack/121level
+expect save settings port_luanotice testpack 1
+shot 22-lua-pack-level

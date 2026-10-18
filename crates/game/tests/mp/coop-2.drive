@@ -1,0 +1,88 @@
+# M6 mode 1 (co-op) with two virtual controllers: the join screen from
+# the main menu, one shared level instance, turns from both players in
+# arrival order, shared undo, global pause owned by its opener, a level
+# entered by one player and solved by both, hot-plug: a third controller
+# joins, is unplugged and its seat is taken over by a new controller.
+size 854x480
+# The first launch plays the intro: hold a key to skip it.
+wait 150
+hold enter 70
+idle 400
+expect state play baba/0level
+idle
+solve
+idle 900
+expect state play baba/106level (map)
+# Pause → Return to menu → title → Multiplayer.
+key escape
+key down 3
+key enter
+idle
+expect state title
+key down 4
+key enter
+expect state join Coop players=0
+pads 2
+pad 1 a
+pad 2 a
+expect state join Coop players=2
+shot 01-join-2
+pad 1 a
+pad 2 a
+expect state ready=2
+wait 50
+expect state multi Coop players=2 views=1
+expect log session Coop baba slot 0 players p1,p2
+idle
+shot 02-coop-map
+# Both players move the one map cursor; P2 confirms 1level.
+p1 walk 1level
+p2 press wait
+idle
+expect state v0 p1,p2 slot0 baba/1level
+p1 expect level baba/1level
+expect same p1 p2
+# 1level = ULLLLLLLUUURRDDRRRR: P1 and P2 take turns; P2 undoes P1's
+# wrong step (shared undo).
+p1 moves ULLL
+p2 moves LLLL
+p1 moves D
+p2 press undo
+expect log turn p2 Undo
+p1 moves UUUR
+p2 moves RDDRRRR
+idle 900
+expect log p2 win 1level
+expect state baba/106level (map)
+expect save 0 baba 1level 3
+expect save 0 baba_prize total 2
+# Global pause: P2 opens it; P1's inputs are ignored; P2 resumes.
+p2 press pause
+expect state menu=Pause
+p1 press back
+expect state menu=Pause
+shot 03-coop-pause
+p2 press back
+expect state views=1 | v0 p1,p2
+# Hot-plug: a third controller joins mid-session.
+pads 1
+pad 3 a
+expect log join p3 controller
+expect state players=3
+p3 press left
+expect log turn p3 Move
+unplug 3
+expect log unplugged p3
+shot 04-coop-unplugged
+pads 1
+pad 4 a
+expect log rejoin p3 controller
+p3 press right
+# End the session (host P1): Resume, Restart, Leave game, End session.
+p1 press pause
+p1 press down 3
+p1 press wait
+idle
+expect state title
+expect log end session p1
+quit

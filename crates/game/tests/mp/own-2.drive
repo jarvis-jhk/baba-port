@@ -1,0 +1,50 @@
+# M6 mode 3 (own games) with two virtual controllers: P1 on slot 1
+# (index 0, the base world's map), P2 on a fresh slot 2 (index 1) starting
+# in the first level; each save only sees its own player's progress.
+size 854x480
+# The first launch plays the intro: hold a key to skip it.
+wait 150
+hold enter 70
+idle 400
+solve
+idle 900
+key escape
+key down 3
+key enter
+idle
+key down 4
+key enter
+pads 2
+pad 1 a
+pad 2 a
+pad 1 up 5
+pad 1 right
+pad 1 right
+expect state join OwnGames players=2
+shot 01-join-own
+pad 1 a
+pad 2 a
+wait 50
+expect state multi OwnGames players=2 views=2 | v0 p1 slot0 baba/106level (map) | v1 p2 slot1 baba/0level
+wait 20
+shot 02-own-2-titlecard
+idle
+p2 solve
+p2 idle 900
+p2 expect level baba/106level
+expect save 1 baba 0level 3
+p1 walk 1level
+p1 press wait
+p1 idle
+p1 solve
+p1 idle 900
+expect save 0 baba 1level 3
+expect save 1 baba 1level 2
+expect differ p1 p2
+shot 03-own-2
+p1 press pause
+p1 press down 3
+p1 press wait
+idle
+expect state title
+quit

@@ -1,0 +1,19 @@
+# AUTO: keys only store a direction; each tick (A) runs one auto turn with
+# the stored direction (idle when nothing was stored), with undo.
+inputs: RAAAUULAWAADDAZAZZRARRAAr
+layer:
+L I A . . . . .
+. . . . . . . .
+. b . . . k . .
+. . . . . . . .
+B I Y . K I M .
+legend:
+L text_level
+I text_is
+A text_auto
+B text_baba
+Y text_you
+K text_keke
+M text_move
+b baba
+k keke v

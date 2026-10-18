@@ -1,0 +1,89 @@
+# M6 mode 3 (own games) with twelve virtual controllers: twelve saves
+# (slots 1–3 and the nine extra slots), twelve independent instances side
+# by side. Screenshots at 1920x1080 and 640x480; two players solve 0level
+# and only their own saves change.
+size 1920x1080
+# The first launch plays the intro: hold a key to skip it.
+wait 150
+hold enter 70
+idle 400
+solve
+idle 900
+key escape
+key down 3
+key enter
+idle
+key down 4
+key enter
+pads 12
+pad 1 a
+pad 2 a
+pad 3 a
+pad 4 a
+pad 5 a
+pad 6 a
+pad 7 a
+pad 8 a
+pad 9 a
+pad 10 a
+pad 11 a
+pad 12 a
+pad 1 up 5
+pad 1 right
+pad 1 right
+expect state join OwnGames players=12
+shot 01-join-own-12
+pad 1 a
+pad 2 a
+pad 3 a
+pad 4 a
+pad 5 a
+pad 6 a
+pad 7 a
+pad 8 a
+pad 9 a
+pad 10 a
+pad 11 a
+pad 12 a
+wait 50
+expect state multi OwnGames players=12 views=12
+expect state v11 p12 slot11 baba/0level
+wait 30
+shot 02-own-12-titlecards
+idle
+expect same p2 p3
+p12 moves RRRR
+p7 moves RR
+p3 press pause
+shot 03-own-12-1080p
+size 640x480
+shot 04-own-12-640x480
+size 1920x1080
+p3 press back
+p12 solve
+p12 idle 900
+expect save 11 baba 0level 3
+expect save 10 baba 0level -
+p7 solve
+p7 idle 900
+expect save 6 baba 0level 3
+expect differ p2 p12
+key f2
+expect state focus=p1
+key f2
+key f2
+key f2
+key f2
+key f2
+key f2
+expect state focus=p7
+shot 05-own-12-focus-p7
+size 640x480
+shot 06-own-12-focus-640x480
+size 1920x1080
+p1 press pause
+p1 press down 3
+p1 press wait
+idle
+expect state title
+quit

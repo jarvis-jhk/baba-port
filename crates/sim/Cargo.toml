@@ -1,0 +1,10 @@
+[package]
+name = "baba-sim"
+description = "Deterministic turn engine for a Baba Is You reimplementation (rules, movement, properties, conversions, undo)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+baba-formats = { path = "../formats" }

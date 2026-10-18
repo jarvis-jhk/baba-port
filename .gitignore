@@ -1,0 +1,24 @@
+# Toolchains, caches and build output (recreatable).
+/tools/
+/target/
+# Third-party checkouts used as references (re-clonable).
+/ext/
+# Copies of the game's code and data, extracted game assets: never committed.
+/ref/
+/cache/
+/scratch/
+# Temporary agent worktrees
+/.claude/worktrees/
+# Backup state of the laptop this is developed on (not project data).
+/.rsync-*
+# Clean-room specs: a checkout of a private repository, never published here.
+/docs/spec/
+
+# Release archives (scripts/package.sh).
+/dist/
+
+# Python bytecode
+__pycache__/
+
+# Release signing keys (backed up with the home backup, never committed).
+/keys/

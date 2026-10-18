@@ -1,0 +1,62 @@
+# M6 mode 2 (shared save) with four players: two virtual controllers and
+# both keyboard halves (P3 left, P4 right). P3 enters 1level, P4 solves
+# 0level again, P1 opens the pause, P2 walks.
+size 854x480
+# The first launch plays the intro: hold a key to skip it.
+wait 150
+hold enter 70
+idle 400
+solve
+idle 900
+key escape
+key down 3
+key enter
+idle
+key down 4
+key enter
+pads 2
+pad 1 a
+pad 2 a
+key space
+key enter
+expect state join Coop players=4
+pad 1 up 5
+pad 1 right
+pad 1 a
+pad 2 a
+key e
+key enter
+wait 50
+expect state multi SharedSave players=4 views=4
+idle
+shot 01-shared-4
+p3 walk 1level
+p3 press wait
+p4 walk 0level
+p4 press wait
+p3 idle
+p4 idle
+p3 expect level baba/1level
+p4 expect level baba/0level
+p2 walk 1level
+p1 press pause
+shot 02-shared-4-mixed
+p1 press back
+p3 solve
+wait 10
+p1 expect icon 1level 3
+p2 expect icon 1level 3
+p3 idle 900
+expect save 0 baba 1level 3
+p4 press pause
+p4 press down
+p4 press wait
+p4 idle
+p4 expect level baba/106level
+shot 03-shared-4-after
+p1 press pause
+p1 press down 3
+p1 press wait
+idle
+expect state title
+quit

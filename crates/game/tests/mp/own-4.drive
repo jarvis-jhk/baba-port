@@ -1,0 +1,59 @@
+# M6 mode 3 (own games) with four players: two virtual controllers and
+# both keyboard halves; P3 picks extra slot 9 (index 8) on the join
+# screen; a controller unplugged mid-level and a new one taking the seat.
+size 854x480
+# The first launch plays the intro: hold a key to skip it.
+wait 150
+hold enter 70
+idle 400
+solve
+idle 900
+key escape
+key down 3
+key enter
+idle
+key down 4
+key enter
+pads 2
+pad 1 a
+pad 2 a
+key e
+key enter
+pad 1 up 5
+pad 1 right
+pad 1 right
+expect state join OwnGames players=4
+# P3 (left half): Ready → up 4 → Save, then left until slot index 8.
+key w 4
+key a 4
+shot 01-join-own-4
+pad 1 a
+pad 2 a
+key e
+key enter
+wait 50
+expect state multi OwnGames players=4 views=4
+expect state v2 p3 slot8 baba/0level
+idle
+p3 moves RRRR
+p4 moves RR
+unplug 2
+expect log unplugged p2
+shot 02-own-4-unplugged
+pads 1
+pad 3 a
+expect log rejoin p2
+p2 solve
+p2 idle 900
+expect save 1 baba 0level 3
+p3 moves RRRR
+p3 idle 900
+expect save 8 baba 0level 3
+expect same p2 p3
+shot 03-own-4
+p1 press pause
+p1 press down 3
+p1 press wait
+idle
+expect state title
+quit

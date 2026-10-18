@@ -1,0 +1,18 @@
+# 3D: two 3D units, turning, moving, cycling the camera with down.
+inputs: URULDUURDLLUDWZZDRRUZZZr
+layer:
+B I Y . . . . .
+. . . . . . . .
+B I T . b . . .
+. . . . . . . .
+. . . . . b . .
+. . . . . . . .
+K I S . . . . .
+legend:
+B text_baba
+I text_is
+Y text_you
+T text_3d
+b baba v
+K text_wall
+S text_stop

@@ -1,0 +1,27 @@
+# Groups: memberships whose conditions mention the group itself
+# (recursive members, conditions.md §2.6).
+inputs: WRRRDDLLWWUURRZZWWDDW
+layer:
+B I G . . . . . . .
+K N G I G . . . . .
+R N G I G . . . . .
+G I M . . . . . . .
+. . . . . . . . . .
+. b . k . . r . . .
+. . . . . . . . . .
+f . . . . . . . . .
+F I Y . . . . . . .
+legend:
+B text_baba
+I text_is
+G text_group
+K text_keke
+N text_near
+R text_rock
+M text_move
+F text_flag
+Y text_you
+b baba
+k keke ^
+r rock <
+f flag

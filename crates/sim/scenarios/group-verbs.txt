@@ -1,0 +1,30 @@
+# Groups: verbs to and from groups (XG: KEKE MAKE GROUP; XN: FLAG EAT NOT
+# GROUP; GX: GROUP HAS ROCK) with a conditional exclusion.
+inputs: WRRRDDWWLLUUWZZWRRDW
+layer:
+B I G . . . . . . .
+R N K I N G . . . .
+K M G . . . . . . .
+F E N G . . . . . .
+G H R . . . . . . .
+. . . . . . . . . .
+. b . . . k . r . .
+. . . . . . . . . .
+. . f . . . . . . .
+F I Y . . . . . . .
+legend:
+B text_baba
+R text_rock
+N text_not
+K text_keke
+I text_is
+G text_group
+M text_make
+E text_eat
+H text_has
+F text_flag
+Y text_you
+b baba
+k keke
+r rock
+f flag

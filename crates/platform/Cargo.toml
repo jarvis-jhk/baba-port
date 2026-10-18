@@ -1,0 +1,26 @@
+[package]
+name = "baba-platform"
+description = "baba-port platform layer: window + GL context, input events, audio mixer, timing (SDL2 backend; Android NativeActivity backend)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[features]
+default = ["sdl2"]
+sdl2 = ["dep:sdl2"]
+# NativeActivity backend (android-activity + EGL + AAudio, no Java); only
+# compiled for target_os = "android".
+android = ["dep:android-activity", "dep:ndk", "dep:jni-sys", "dep:libc"]
+
+[dependencies]
+glow = "0.18"
+lewton = "0.10"
+log = "0.4"
+sdl2 = { version = "0.38", optional = true }
+
+[target.'cfg(target_os = "android")'.dependencies]
+android-activity = { version = "0.6.1", features = ["native-activity"], optional = true }
+ndk = { version = "0.9", default-features = false, features = ["audio", "api-level-26"], optional = true }
+jni-sys = { version = "0.3", optional = true }
+libc = { version = "0.2", optional = true }

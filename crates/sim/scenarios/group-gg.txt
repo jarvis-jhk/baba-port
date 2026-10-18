@@ -1,0 +1,27 @@
+# Groups: GROUP IS GROUP (every member is every member) and NOT GROUP IS
+# MOVE (NGX), then FLAG IS NOT GROUP style exclusions via ROCK IS NOT GROUP.
+inputs: WWRRUUWLLDDWZZZWRRW
+layer:
+B I G . . . . . .
+K I G . . . . . .
+G I G . . . . . .
+N G I M . . . . .
+R I N G . . . . .
+. b . k . r . . .
+. . . . . . . . .
+. f . . . . . . .
+F I Y . . . . . .
+legend:
+B text_baba
+K text_keke
+R text_rock
+I text_is
+G text_group
+N text_not
+M text_move
+F text_flag
+Y text_you
+b baba
+k keke
+r rock v
+f flag

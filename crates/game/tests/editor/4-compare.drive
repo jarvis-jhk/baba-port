@@ -1,0 +1,36 @@
+# M8: the editor's screens against captures of the original showing the
+# same level ("Drive test" from 1-create.drive, loaded into the original's
+# editor; captures in ${M8_REF}, taken with scripts/dev/ref-run.sh). Our
+# layout follows the original's arrangement with our own art and font, so
+# the numbers measure closeness, they are not pass/fail. Runs last (the
+# main menu has Continue after 3-pack.drive).
+size 854x480
+idle 300
+key down 2
+key enter
+wait 5
+expect state menu=Editor(Start)
+shot 60-start
+compare 60-start ${M8_REF}/o21.png
+key enter
+wait 2
+shot 61-levels
+compare 61-levels ${M8_REF}/o22-levels.png
+key down 2
+key enter
+wait 2
+expect state editor Main level=levels/0level
+shot 62-level
+compare 62-level ${M8_REF}/o24-our-level-in-original-editor.png
+key tab
+shot 63-palette
+compare 63-palette ${M8_REF}/o30-palette.png
+key tab
+key f1
+shot 64-settings
+compare 64-settings ${M8_REF}/o31-settings.png
+key escape
+key escape
+shot 65-levelmenu
+compare 65-levelmenu ${M8_REF}/o32-levelmenu.png
+key escape

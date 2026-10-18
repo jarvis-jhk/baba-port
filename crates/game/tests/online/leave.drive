@@ -1,0 +1,28 @@
+# M7 online: a machine leaves mid-session (shared save). Its players' views
+# go, the others play on and agree at the end.
+size 1280x720
+# The first launch plays the intro: hold a key to skip it.
+wait 150
+hold enter 70
+idle 400
+@host online host private ${ROOMFILE}
+@m1 online join code ${ROOMFILE}
+@!m0,m1 online join invite ${ROOMFILE}
+@host online wait 90 machines=${MACHINES}
+@host online mode shared
+online seats ${LOCALS}
+online wait 90 online session
+online wait 60 players=${PLAYERS}
+online bots 4
+@m2 online leave
+@m2 online wait 30 menu=Online
+@m2 shot 01-left
+@m2 quit
+online wait 60 players=4
+online bots 4
+online settle 60
+shot 02-after-leave
+@host online end
+online wait 90 online room
+online expect agreed
+quit

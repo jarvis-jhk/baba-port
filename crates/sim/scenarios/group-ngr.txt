@@ -1,0 +1,25 @@
+# Groups: NOT GROUP IS GROUP2 (NGR fixed point) with GROUP2 IS PUSH, and
+# breaking/re-forming the membership.
+inputs: WRRUURRDDLLWZZRRRUUW
+layer:
+B I G . . . . . .
+N G I H . . . . .
+H I P . . . . . .
+. . . . . . . . .
+. b . k . r . . .
+. . . . . . . . .
+. f . . . . . . .
+F I Y . . . . . .
+legend:
+B text_baba
+I text_is
+G text_group
+N text_not
+H text_group2
+P text_push
+F text_flag
+Y text_you
+b baba
+k keke
+r rock
+f flag

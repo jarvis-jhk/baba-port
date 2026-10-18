@@ -1,0 +1,12 @@
+[package]
+name = "baba-solver"
+description = "Dev tool: search-based level solver and text dumper for building verified solution corpora (not shipped)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+baba-formats = { path = "../formats" }
+baba-sim = { path = "../sim" }

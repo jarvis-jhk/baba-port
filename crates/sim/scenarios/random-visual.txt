@@ -1,0 +1,28 @@
+# OFTEN/SELDOM in the passes that only seem cosmetic: colour properties,
+# HIDE, PARTY and the player check all draw on a cache miss, in the
+# original's order; CHILL draws in the move phase.
+inputs: WRRWDDLLWWUUZZWRDLUWWZW
+layer:
+O K I R . . . . .
+S K I U . . . . .
+O R I H . . . . .
+S K I P . . . . .
+O B I Y . . . . .
+B I Y . K I C . .
+. b . . k . . r .
+. . . . . . k . .
+legend:
+O text_often
+S text_seldom
+K text_keke
+R text_red
+U text_blue
+H text_hide
+P text_party
+B text_baba
+Y text_you
+I text_is
+C text_chill
+b baba
+k keke
+r rock

@@ -1,0 +1,21 @@
+[package]
+name = "baba-http"
+description = "Minimal blocking HTTP(S) client for baba-port (level codes): GET/POST with a timeout, status codes as values"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+log = "0.4"
+
+# Same TLS setup as baba-net (crates/vendor/ureq leaves the crypto provider
+# out): ring on desktop targets, a pure-Rust provider on Android and aarch64
+# Linux (PortMaster), which are cross-built without a C compiler.
+[target.'cfg(not(any(target_os = "android", all(target_os = "linux", target_arch = "aarch64"))))'.dependencies]
+ureq = { version = "3", default-features = false, features = ["rustls", "_ring"] }
+
+[target.'cfg(any(target_os = "android", all(target_os = "linux", target_arch = "aarch64")))'.dependencies]
+ureq = { version = "3", default-features = false, features = ["rustls"] }
+rustls = { version = "0.23", default-features = false, features = ["std"] }
+rustls-rustcrypto = "0.0.2-alpha"

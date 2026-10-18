@@ -1,0 +1,31 @@
+# Groups: same as group-ggr-conds with the unconditional membership first,
+# plus GROUP2 IS NOT GROUP3 feeding an exclusion.
+inputs: WWRRRUWWLLDDWWZZRRUULLWWW
+layer:
+B I G . . . . . . .
+K N R I G . . . . .
+G I H . . . . . . .
+H I M . . . . . . .
+H I N T . . . . . .
+T I P . . . . . . .
+. b . . . r . k . .
+. . . . . . . . . .
+. . f . . . . . . .
+F I Y . . . . . . .
+legend:
+K text_keke
+N text_near
+R text_rock
+I text_is
+G text_group
+B text_baba
+H text_group2
+T text_group3
+P text_push
+M text_move
+F text_flag
+Y text_you
+b baba
+r rock
+k keke <
+f flag

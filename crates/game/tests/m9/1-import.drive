@@ -1,0 +1,37 @@
+# M9: first start with an original save present ($BABA_IMPORT_FROM, a
+# copy): the import offer, importing, the summary, then Continue lands on
+# the map of the imported last session. Run by scripts/dev/m9-test.sh.
+size 854x480
+idle 300
+expect state menu=Ext(ImportOffer)
+expect log import offer
+shot 01-import-offer
+key enter
+expect state menu=Ext(ImportDone)
+expect log imported
+shot 02-import-done
+expect save global baba lastslot 2
+expect save global baba firsttime 1
+expect save settings settings music 71
+expect save settings slotnames 0 a
+expect save settings gamepad restart 5
+expect save settings gamepad pause 8
+expect save 2 baba 207level 3
+expect save 2 baba_prize total 30
+expect save 2 baba m_lastpack -
+expect save 0 museum 101level 3
+expect save 0 new_adv 42level 3
+expect save 1 baba leveltree 106level,177level
+key enter
+expect state title menu=Main
+key enter
+idle 900
+expect state play baba/207level (map)
+shot 03-continue-island
+key escape
+expect state menu=Pause
+key down
+key enter
+idle 900
+expect state play baba/106level (map)
+shot 04-main-map

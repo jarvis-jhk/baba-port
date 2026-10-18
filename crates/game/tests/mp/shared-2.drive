@@ -1,0 +1,88 @@
+# M6 mode 2 (shared save, splitscreen) with two virtual controllers: own
+# map cursor and level each; P1 clears 1level while P2 stands on the map,
+# and P2's map shows it at once; P2 replays 0level (no second spore);
+# per-player Previous; zoom toggle; per-player pause; leave and rejoin.
+size 854x480
+# The first launch plays the intro: hold a key to skip it.
+wait 150
+hold enter 70
+idle 400
+solve
+idle 900
+key escape
+key down 3
+key enter
+idle
+key down 4
+key enter
+pads 2
+pad 1 a
+pad 2 a
+# P1 (host): Ready → Mode (up five rows), shared save.
+pad 1 up 5
+pad 1 right
+expect state join SharedSave players=2
+shot 01-join-shared
+pad 1 a
+pad 2 a
+wait 50
+expect state multi SharedSave players=2 views=2 | v0 p1 slot0 baba/106level (map) | v1 p2 slot0 baba/106level (map)
+idle
+shot 02-shared-2
+p1 walk 1level
+p1 press wait
+p1 idle
+p1 expect level baba/1level
+p2 expect level baba/106level
+p2 press right
+shot 03-shared-p1-in-level
+p1 solve
+wait 10
+expect log p1 win 1level
+p2 expect icon 1level 3
+expect log refresh 106level
+shot 04-shared-p1-won
+p1 idle 900
+p1 expect level baba/106level
+p1 expect icon 1level 3
+expect save 0 baba 1level 3
+expect save 0 baba_prize total 2
+# P2 plays 0level again: no extra spore; Previous stays P1's.
+p2 walk 0level
+p2 press wait
+p2 idle
+p2 expect level baba/0level
+p2 solve
+p2 idle 900
+expect save 0 baba_prize total 2
+expect save 0 baba Previous 1level
+# Zoom: P1's Back, then F2 cycles.
+pad 1 back
+expect state focus=p1
+shot 05-shared-focus-p1
+key f2
+expect state focus=p2
+key f2
+expect state views=2 | v0
+# Per-player pause: P2 paused, P1 keeps playing.
+p2 press pause
+expect state v1 p2 slot0 baba/106level (map) menu=Pause
+p1 press left
+expect log turn p1 Move
+shot 06-shared-pause-p2
+p2 press back
+# P2 leaves (Resume, Restart, Leave game) and rejoins with its pad.
+p2 press pause
+p2 press down 2
+p2 press wait
+expect log leave p2
+expect state players=1 views=1
+pad 2 a
+expect log rejoin p2
+expect state players=2 views=2
+p1 press pause
+p1 press down 3
+p1 press wait
+idle
+expect state title
+quit

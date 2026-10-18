@@ -1,0 +1,25 @@
+# OFTEN/SELDOM memberships: the group refresh at the end of every turn and
+# GROUP IS MOVE both draw.
+inputs: WWRRWWLLDDWZZWWUUW
+layer:
+O K I G . . . .
+S R I G . . . .
+G I M . . . . .
+. . . . . . . .
+. k . . r . k .
+. . . . . . . .
+. f . . . . . .
+F I Y . . . . .
+legend:
+O text_often
+S text_seldom
+K text_keke
+R text_rock
+I text_is
+G text_group
+M text_move
+F text_flag
+Y text_you
+k keke
+r rock v
+f flag

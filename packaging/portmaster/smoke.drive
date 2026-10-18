@@ -1,0 +1,46 @@
+# PortMaster release smoke test (scripts/package/verify.sh portmaster, under
+# qemu with --window --size WxH; the size line is prepended there): first
+# launch by pad, level 0, the map, pause and title menus, level 1.
+wait 20
+pad a
+idle 400
+expect state play baba/0level
+pad right
+idle
+pad b
+idle
+shot 01-level0
+solve
+idle 900
+expect state play baba/106level (map)
+shot 02-map
+pad start
+expect state menu=Pause
+shot 03-pause
+pad b
+pad select
+expect state menu=Pause
+pad down 3
+pad a
+idle
+expect state title
+shot 04-title
+# Title grid: Continue / Start | Play levels / Editor | Settings / ...
+pad down 2
+pad right
+pad a
+expect state menu=Settings
+shot 05-settings
+pad b
+pad up 2
+pad a
+idle 600
+expect state play baba/106level (map)
+walk 1level
+pad a
+wait 70
+shot 06-titlecard
+idle
+expect state play baba/1level
+shot 07-level1
+quit

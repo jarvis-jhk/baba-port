@@ -1,0 +1,180 @@
+# New Adventures and the Museum, languages (TTF and CJK), key rebinding,
+# the credits and both base-world endings. Runs after 2-menus.drive.
+size 854x480
+idle 300
+expect state title
+# New Adventures in slot 2: its first level opens first (progression §7.5).
+key down
+key enter
+key down
+key enter
+key down
+key down
+key enter
+idle 600
+expect state play new_adv/42level
+shot 20-new_adv-first
+key escape
+key down
+key enter
+idle 600
+expect state play new_adv/41level (map)
+shot 21-new_adv-map
+compare 21-new_adv-map ${BABA_REF}/new_adv-map.png
+expect save 1 new_adv Previous 42level
+# The Museum (slot 2), straight to its root map.
+goto museum 85level 1
+idle 600
+expect state play museum/85level (map)
+shot 22-museum-map
+compare 22-museum-map ${BABA_REF}/museum-map.png
+key escape
+key up
+key enter
+idle
+expect state title
+# Settings → Language → Japanese (TTF, CJK glyphs on demand).
+key down
+key down
+key right
+key enter
+expect state menu=Settings
+key down
+key down
+key down
+key enter
+expect state menu=Language
+key down
+key down
+key down
+key right
+key enter
+expect save settings settings lang jpn
+shot 23-language-jpn
+key escape
+shot 24-settings-jpn
+# Simplified Chinese uses the sc font (the selection stays on Language).
+key enter
+key down
+key down
+key down
+key down
+key down
+key down
+key down
+key down
+key enter
+expect save settings settings lang zhcn
+shot 25-language-zhcn
+# Back to English.
+key up
+key up
+key up
+key up
+key up
+key up
+key up
+key enter
+expect save settings settings lang en
+key escape
+# Controls → Keyboard setup → rebind Undo to U, then reset.
+key down
+key enter
+expect state menu=Controls
+shot 26-controls
+key down
+key down
+key down
+key down
+key enter
+expect state menu=KeySetup
+key down
+key down
+key down
+key down
+key down
+key down
+key enter
+expect state menu=Waiting
+key u
+expect save settings keyboard undo 117
+shot 27-keysetup
+key escape
+key down
+key enter
+expect save settings keyboard undo 122
+key escape
+key escape
+expect state title menu=Main
+# Credits from the main menu (selection is on Settings).
+key down
+key left
+key enter
+idle
+expect state credits Menu
+wait 240
+shot 28-credits
+key escape
+idle
+expect state title
+# The base world's END (FLAG IS END in "A Way Out?") and All Is Done.
+goto baba 203level 2
+idle
+solve FLAG IS END
+expect state cutscene=end
+expect save 2 baba end 1
+expect log ending sequence end
+wait 120
+shot 29a-end-flower
+wait 120
+shot 29b-end-blossoms
+# Collecting the blossoms is skipped by holding a key (not the arrows).
+hold enter 100
+wait 120
+expect state credits End show
+wait 700
+shot 29c-the-end-island
+expect sound dididi
+wait 1300
+shot 29d-logo-credits
+expect music ending
+key escape
+idle 600
+expect state credits End
+wait 200
+shot 30-end-credits
+key escape
+idle 600
+expect state title
+goto baba 198level 2
+idle
+solve ALL IS DONE
+expect state cutscene=done
+expect log ending sequence done
+wait 600
+shot 31a-all-is-done
+idle 1800
+expect state credits Done
+expect save 2 baba done 1
+expect save settings editor special 1
+key escape
+idle 600
+expect state title
+# Erase slot 3 (No is preselected).
+key down
+key enter
+key down
+key down
+key enter
+expect state menu=Erase
+key down
+key down
+key enter
+expect state EraseConfirm(2)
+key right
+key enter
+expect save 2 baba end -
+expect save 0 baba 0level 3
+expect log erase slot 2
+shot 31-erase
+quit

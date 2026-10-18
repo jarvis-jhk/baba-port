@@ -1,0 +1,22 @@
+# 3D: the camera unit (not YOU) walks into DEFEAT; the camera stays where
+# it died; down cycles between the remaining targets; undo brings it back.
+inputs: UUURRUUDDLZZZUULDWZRRRUUU
+layer:
+K I T . . . . . .
+. . . . . . . . .
+S I D . . . x . .
+. . . . . . . . .
+. . . k . . . k .
+. . . . . . . . .
+B I Y . b . . . .
+legend:
+K text_keke
+I text_is
+T text_3d
+S text_skull
+D text_defeat
+B text_baba
+Y text_you
+k keke ^
+x skull
+b baba

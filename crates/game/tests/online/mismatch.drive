@@ -1,0 +1,14 @@
+# M7 online: m1 runs another build (BABA_NET_BUILD); the host refuses it
+# and m1 says why.
+size 1280x720
+# The first launch plays the intro: hold a key to skip it.
+wait 150
+hold enter 70
+idle 400
+@host online host private ${ROOMFILE}
+@m1 online join code ${ROOMFILE} 60 rejected
+@m1 shot 01-rejected
+@m1 online touch ${STARTED}
+@host online wait-file ${STARTED} 90
+@host online wait 5 machines=1
+quit

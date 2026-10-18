@@ -1,0 +1,18 @@
+# 3D: BABA pushes the 3D word out of KEKE IS 3D (3D ends), puts it back
+# (3D starts again), and undoes across both changes.
+inputs: RRRUURDDLLLURRDZZZZRRRUURDD
+layer:
+. . . . . . . .
+K I T . . . . .
+. . . . . . . .
+. . . . . . k .
+b . . . . . . .
+B I Y . . . . .
+legend:
+K text_keke
+I text_is
+T text_3d
+B text_baba
+Y text_you
+k keke <
+b baba

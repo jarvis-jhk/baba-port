@@ -1,0 +1,29 @@
+# M7 online: a desync (co-op). m1 changes its copy of the level behind the
+# stream's back; the host's hash comparison reports it, m1 rebuilds its
+# game by replaying every stream and is back in sync; everyone agrees at
+# the end.
+size 1280x720
+# The first launch plays the intro: hold a key to skip it.
+wait 150
+hold enter 70
+idle 400
+@host online host private ${ROOMFILE}
+@m1 online join code ${ROOMFILE}
+@!m0,m1 online join invite ${ROOMFILE}
+@host online wait 90 machines=${MACHINES}
+@host online mode coop
+online seats ${LOCALS}
+online wait 90 online session
+online wait 60 players=${PLAYERS}
+online bots 3
+online settle 30
+@m1 online corrupt
+online bots 3
+online settle 60
+@m1 shot 01-resynced
+@host online end
+online wait 90 online room
+online expect agreed
+online expect desync
+@m1 online expect resynced
+quit

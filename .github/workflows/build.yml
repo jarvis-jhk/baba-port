@@ -1,0 +1,253 @@
+# Release archives for every platform, built and smoke-tested without the
+# game (the repository and the runners have no game data). Called by ci.yml
+# (every push / pull request) and release.yml (tags). Written and checked
+# locally, not yet run on GitHub: the first private-repository run is its
+# test (docs/STATUS.md, M11).
+name: build
+
+on:
+  workflow_call:
+    inputs:
+      release:
+        description: Sign the APK with the release key (secrets) and fail without it
+        type: boolean
+        default: false
+    secrets:
+      ANDROID_RELEASE_KEY_PEM_B64:
+        required: false
+      ANDROID_RELEASE_CERT_DER_B64:
+        required: false
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: "1"
+  # scripts/package/verify.sh output (git-ignored scratch/).
+  VERIFY_DIR: scratch/pkgtest
+
+jobs:
+  linux:
+    name: linux x86_64 (tar.gz)
+    # ubuntu-22.04 on purpose: glibc 2.35 is the oldest the binary may need
+    # (Ubuntu 22.04+, Debian 12, SteamOS 3).
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: System packages (SDL2 build deps, Mesa EGL for the headless smoke test)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends binutils file \
+            libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxss-dev \
+            libxinerama-dev libxfixes-dev libxkbcommon-dev libwayland-dev wayland-protocols \
+            libdecor-0-dev libegl-dev libgl-dev libgles-dev libdrm-dev libgbm-dev libpulse-dev \
+            libasound2-dev libpipewire-0.3-dev libudev-dev libdbus-1-dev libibus-1.0-dev \
+            libegl1 libegl-mesa0 libgl1-mesa-dri
+      - uses: ./.github/actions/setup
+        with:
+          cache-key: package-linux
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tools/sdl2-linux
+          key: sdl2-linux-${{ hashFiles('scripts/ci/build-sdl2-linux.sh') }}
+      - run: scripts/ci/build-sdl2-linux.sh
+      - name: Build, package, check and smoke-test
+        run: |
+          export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
+          export BABA_BUILD_ID=$(git describe --tags --always --dirty)
+          export BABA_SDL2_LIB_DIR="$PWD/tools/sdl2-linux/lib"
+          scripts/package.sh --only linux --bundle-sdl --verify
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: baba-port-linux
+          path: dist/baba-port-*-linux-x86_64.tar.gz
+          if-no-files-found: error
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: smoke-linux
+          path: scratch/pkgtest/linux/*.png
+          if-no-files-found: ignore
+
+  windows:
+    name: windows x86_64 (zip, cross-built)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          targets: x86_64-pc-windows-gnu
+          cache-key: package-windows
+      # llvm-mingw + the SDL2 mingw release, SHA-256 pinned in the script.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tools/windows/downloads
+          key: windows-toolchain-${{ hashFiles('scripts/windows/fetch-toolchain.sh') }}
+      - run: scripts/windows/fetch-toolchain.sh
+      - name: Cross-build, package, check (no Wine on the runner: static checks)
+        run: |
+          export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
+          export BABA_BUILD_ID=$(git describe --tags --always --dirty)
+          scripts/package.sh --only windows --verify
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: baba-port-windows
+          path: dist/baba-port-*-windows-x86_64.zip
+          if-no-files-found: error
+
+  android:
+    name: android arm64 (APK, no Java/Gradle/clang)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          targets: aarch64-linux-android
+          cache-key: package-android
+      # The pruned NDK pieces (1.6 MB of a 739 MB download).
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tools/android/ndk-min
+          key: android-ndk-min-${{ hashFiles('scripts/android/fetch-toolchain.sh') }}
+      - run: scripts/android/fetch-toolchain.sh
+      - name: Release key from secrets (release builds)
+        env:
+          KEY: ${{ secrets.ANDROID_RELEASE_KEY_PEM_B64 }}
+          CERT: ${{ secrets.ANDROID_RELEASE_CERT_DER_B64 }}
+          RELEASE: ${{ inputs.release }}
+        run: |
+          if [ -n "$KEY" ] && [ -n "$CERT" ]; then
+            d="$RUNNER_TEMP/android-release-key"
+            mkdir -p "$d" && chmod 700 "$d"
+            (umask 077; echo "$KEY" | base64 -d > "$d/key.pem")
+            echo "$CERT" | base64 -d > "$d/cert.der"
+            echo "BABA_ANDROID_KEY_DIR=$d" >> "$GITHUB_ENV"
+            openssl x509 -inform DER -in "$d/cert.der" -noout -fingerprint -sha256
+          elif [ "$RELEASE" = true ]; then
+            echo "::error::release build without ANDROID_RELEASE_KEY_PEM_B64 / ANDROID_RELEASE_CERT_DER_B64"
+            exit 1
+          else
+            echo "no release key: the APK is signed with a throwaway debug key (-debugkey.apk)"
+          fi
+      - name: Build, package, check
+        run: |
+          export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
+          export BABA_BUILD_ID=$(git describe --tags --always --dirty)
+          scripts/package.sh --only android --verify
+      - name: Remove the key
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/android-release-key"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: baba-port-android
+          path: dist/baba-port-*-android-arm64*.apk
+          if-no-files-found: error
+
+  portmaster:
+    name: portmaster aarch64 (port zip, glibc 2.17)
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          targets: aarch64-unknown-linux-gnu
+          cache-key: package-portmaster
+      # glibc 2.28 sysroot + qemu-user + the Debian 12 arm64 test rootfs
+      # (.debs checked against Debian's Packages SHA-256).
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            tools/portmaster/sysroot
+            tools/portmaster/qemu-aarch64-static
+            tools/portmaster/rootfs
+          key: portmaster-toolchain-${{ hashFiles('scripts/portmaster/fetch-toolchain.sh', 'scripts/portmaster/debfetch.py') }}
+      - run: scripts/portmaster/fetch-toolchain.sh --qemu
+      - name: Cross-build, package, check, no-data screen under qemu
+        run: |
+          export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
+          export BABA_BUILD_ID=$(git describe --tags --always --dirty)
+          scripts/package.sh --only portmaster --verify
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: baba-port-portmaster
+          path: dist/baba-port-*-portmaster.zip
+          if-no-files-found: error
+
+  macos:
+    name: macOS universal (.app zip, ad-hoc signed)
+    runs-on: macos-14 # Apple Silicon; the x86_64 slice is cross-built with the same SDK
+    env:
+      MACOSX_DEPLOYMENT_TARGET: "11.0"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+          cache-key: package-macos
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: tools/macos/downloads
+          key: macos-sdl2-${{ hashFiles('scripts/macos/fetch-sdl2.sh') }}
+      - name: Build and package (universal binary, SDL2.framework, ad-hoc signature)
+        run: |
+          export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
+          export BABA_BUILD_ID=$(git describe --tags --always --dirty)
+          scripts/package/macos.sh
+      - name: Smoke test both slices
+        run: |
+          mkdir -p scratch/pkgtest/macos && cd scratch/pkgtest/macos
+          ditto -x -k "$GITHUB_WORKSPACE"/dist/baba-port-*-macos-universal.zip .
+          exe=baba-port.app/Contents/MacOS/baba-port
+          codesign --verify --deep --strict baba-port.app
+          "$exe" --version
+          arch -x86_64 "$exe" --version
+      - name: No-data screen in a window (runner VMs may lack OpenGL)
+        continue-on-error: true
+        run: |
+          cd scratch/pkgtest/macos
+          exe=baba-port.app/Contents/MacOS/baba-port
+          BABA_PORT_DATA_DIR="$PWD/data" SDL_AUDIODRIVER=dummy "$exe" --frames 30 --screenshot "$PWD/no-data-arm64.png"
+          BABA_PORT_DATA_DIR="$PWD/data" SDL_AUDIODRIVER=dummy arch -x86_64 "$exe" --frames 30 --screenshot "$PWD/no-data-x86_64.png"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: baba-port-macos
+          path: dist/baba-port-*-macos-universal.zip
+          if-no-files-found: error
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: smoke-macos
+          path: scratch/pkgtest/macos/*.png
+          if-no-files-found: ignore
+
+  archives:
+    name: all archives (SHA256SUMS, descriptor, no game data)
+    needs: [linux, windows, android, portmaster, macos]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: baba-port-*
+          path: dist
+          merge-multiple: true
+      - name: Checks over every archive
+        run: scripts/package.sh --checks-only
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: SHA256SUMS
+          path: dist/SHA256SUMS
+          if-no-files-found: error

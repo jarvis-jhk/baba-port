@@ -1,0 +1,17 @@
+[package]
+name = "baba-formats"
+description = "Readers for the data files of a Baba Is You install (levels, objects, palettes, sprites, themes, saves, Assets.dat)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+miniz_oxide = "0.8"
+png = "0.18"
+
+[[example]]
+name = "levels_sheet"
+
+[[example]]
+name = "assets_dump"

@@ -1,0 +1,40 @@
+[package]
+name = "baba-port"
+description = "baba-port game: title, menus, map and level flow, saves, audio rules; desktop binary and a platform-agnostic App"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+name = "baba_game"
+path = "src/lib.rs"
+
+[[bin]]
+name = "baba-port"
+path = "src/main.rs"
+required-features = ["sdl"]
+
+[features]
+default = ["sdl"]
+# Desktop backend (the binary); an Android build uses the library without it.
+sdl = ["baba-platform/sdl2", "dep:sdl2"]
+# Level upload/report to Hempuli's server (levelcodes.md §6-§7). Off by
+# default: never upload without the owner's explicit approval.
+upload = []
+
+[dependencies]
+baba-http = { path = "../http" }
+# The level server stores .l/.ld zlib-wrapped (pure-Rust miniz_oxide backend).
+flate2 = "1"
+baba-formats = { path = "../formats" }
+baba-render = { path = "../render" }
+baba-platform = { path = "../platform", default-features = false }
+baba-sim = { path = "../sim" }
+baba-progress = { path = "../progress" }
+# Online play over Warpzone (M7).
+baba-net = { path = "../net" }
+ab_glyph = { version = "0.2", default-features = false, features = ["std"] }
+log = "0.4"
+# Scripted runs plug SDL virtual controllers in (drive.rs, input only).
+sdl2 = { version = "0.38", optional = true }

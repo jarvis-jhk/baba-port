@@ -1,0 +1,187 @@
+# M8: a custom level from scratch. Title → Level editor (the intro
+# tutorial is skipped) → Edit custom levels → Create a new level (no
+# theme) → level settings (author, subtitle, music, palette, 15×8) →
+# objects placed with the quickbar, Swap and the mouse → undo → test play
+# to a win through the normal play path → save → leave, reopen and save
+# again: the files are byte-identical → object list (keke added) → theme
+# saved. m8-test.sh seeds a data dir where the first launch is done.
+size 854x480
+idle 300
+expect state title menu=Main
+key down
+key enter
+wait 5
+expect log editor
+expect state editor Main level=levels/_tutorial_
+key escape
+wait 2
+expect log tutorial end
+expect state menu=Editor(Tutorials)
+key escape
+key escape
+expect state menu=Editor(Start)
+shot 01-start
+key enter
+expect state menu=Editor(Levels { page: 0 })
+key down
+key right
+key enter
+expect state menu=Editor(Prompt { kind: NewLevel
+type Drive test
+shot 02-prompt
+key enter
+expect state menu=Editor(NewTheme
+key enter
+wait 2
+expect state editor Main level=levels/0level
+expect log editor new levels/0level
+expect file worlds/levels/0level.ld name=Drive test
+expect file worlds/levels/0level.l -
+expect file worlds/levels/0level.png -
+shot 03-new-level
+
+# Level settings (F1): author, subtitle, music, palette, size 15×8.
+key f1
+expect state menu=Editor(Settings)
+key down 2
+key enter
+type Tester
+key enter
+key down
+key enter
+type A drive test
+key enter
+key down
+key enter
+expect state menu=Editor(Music
+key down 3
+key enter
+key down 2
+key enter
+expect state menu=Editor(Palettes
+key down 2
+key enter
+key down
+key enter
+expect state menu=Editor(Size { w: 33, h: 18 })
+key down 4
+key right
+key enter
+expect state menu=Editor(Size { w: 15, h: 8 })
+key up
+key enter
+expect log level size 15x8
+shot 04-settings
+key escape
+wait 2
+expect state editor Main level=levels/0level
+
+# BABA IS YOU, FLAG IS WIN, baba and flag (quickbar 1 is, 2 baba, 3 you,
+# 4 flag, 5 win; Swap turns baba / flag into their words).
+key 2
+click 364 467
+cell 2 2
+key 1
+cell 3 2
+key 3
+cell 4 2
+key 4
+click 364 467
+cell 9 2
+key 1
+cell 10 2
+key 5
+cell 11 2
+key 2
+click 364 467
+cell 3 6
+key 4
+click 364 467
+cell 9 6
+# A wall line, then undo it.
+key 9
+paint 2 8 14 8
+expect state undo=9
+shot 05-wall
+key ctrl+z
+expect state undo=8
+shot 06-placed
+
+# Test play (F3) to a win, back in the editor.
+key f3
+wait 2
+expect state play levels/_EDITORTEST_
+expect log editor test
+expect nofile worlds/levels/_EDITORTEST_.ld
+shot 07-test
+# The pause menu of a test: Return to editor, no Return to menu.
+key escape
+expect state menu=Pause
+shot 07b-test-pause
+key escape
+expect state play levels/_EDITORTEST_
+moves RRRRRR
+idle 600
+expect log single win _EDITORTEST_
+wait 200
+expect state editor Main level=levels/0level
+expect log editor test end won=true
+
+# Save, leave to the list, reopen, save again: identical files.
+key ctrl+s
+wait 2
+expect log editor saved 0level
+expect file worlds/levels/0level.ld author=Tester
+expect file worlds/levels/0level.ld subtitle=A drive test
+expect file worlds/levels/0level.ld music=cave
+expect file worlds/levels/0level.ld palette=autumn.png
+expect file worlds/levels/0level.ld name=text_baba
+snap saved1
+key backspace
+wait 2
+expect state menu=Editor(Levels { page: 0 })
+shot 08-list
+key down 2
+key enter
+wait 2
+expect state editor Main level=levels/0level
+key ctrl+s
+wait 2
+expect snap saved1
+
+# Object list: add keke (the palette pairs it with its word).
+key r
+expect state editor ObjList
+type keke
+shot 09-objlist
+key enter
+expect state editor Palette
+expect log palette add
+shot 10-palette
+key escape
+expect state editor Main
+key ctrl+s
+wait 2
+expect file worlds/levels/0level.ld name=keke
+expect file worlds/levels/0level.ld name=text_keke
+
+# Save the palette as a theme.
+key escape
+expect state menu=Editor(LevelMenu)
+# (Upload is disabled in this build and skipped.)
+key down 2
+key enter
+expect state menu=Editor(Themes)
+key down
+key enter
+type Drive theme
+key enter
+wait 2
+expect log theme saved
+expect file worlds/levels/Themes/0theme.txt name=Drive theme
+expect file worlds/levels/Themes/0theme.txt name=keke
+key escape
+key escape
+wait 2
+expect state editor Main
+shot 11-done

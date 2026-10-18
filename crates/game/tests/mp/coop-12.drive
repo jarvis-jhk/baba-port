@@ -1,0 +1,66 @@
+# M6 mode 1 (co-op) with twelve virtual controllers: one level instance,
+# twelve players; same-tick presses of all twelve become twelve turns in
+# SDL delivery order; a thirteenth controller cannot join.
+size 1920x1080
+# The first launch plays the intro: hold a key to skip it.
+wait 150
+hold enter 70
+idle 400
+solve
+idle 900
+key escape
+key down 3
+key enter
+idle
+key down 4
+key enter
+pads 13
+pad 1 a
+pad 2 a
+pad 3 a
+pad 4 a
+pad 5 a
+pad 6 a
+pad 7 a
+pad 8 a
+pad 9 a
+pad 10 a
+pad 11 a
+pad 12 a
+pad 13 a
+expect state join Coop players=12
+shot 01-join-12
+pad 1 a
+pad 2 a
+pad 3 a
+pad 4 a
+pad 5 a
+pad 6 a
+pad 7 a
+pad 8 a
+pad 9 a
+pad 10 a
+pad 11 a
+pad 12 a
+wait 50
+expect state multi Coop players=12 views=1
+idle
+chord up 1 2 3 4 5 6 7 8 9 10 11 12
+chord down 12 11 10 9 8 7 6 5 4 3 2 1
+p12 walk 1level
+p7 press wait
+idle
+p3 expect level baba/1level
+expect same p1 p12
+shot 02-coop-12-1080p
+size 640x480
+shot 03-coop-12-640x480
+size 1920x1080
+p11 press undo
+expect log turn p11 Undo
+p1 press pause
+p1 press down 4
+p1 press wait
+idle
+expect state title
+quit

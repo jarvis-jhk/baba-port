@@ -1,0 +1,31 @@
+[package]
+name = "baba-net"
+description = "Online sessions for baba-port: lobby, host-sequenced turn streams, late join, host migration and desync detection over Warpzone peer channels"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+bincode = "1.3"
+log = "0.4"
+# The Warpzone client, from the checkout in ext/warpzone (docs/net.md).
+warpzone-core = { path = "../../ext/warpzone/crates/core" }
+
+# TLS for the Warpzone API (ureq + rustls; crates/vendor/ureq leaves the
+# crypto provider out). Desktop: ring, as upstream ureq would pick it.
+[target.'cfg(not(any(target_os = "android", all(target_os = "linux", target_arch = "aarch64"))))'.dependencies]
+ureq = { version = "3", default-features = false, features = ["_ring"] }
+
+# Android and aarch64 Linux (PortMaster) are cross-built without a C compiler,
+# so no ring: a pure-Rust provider, installed by `tls::install_crypto_provider`.
+# (graviola would be faster but asserts the ARMv8 crypto extensions at run
+# time, which not every PortMaster SoC has.)
+[target.'cfg(any(target_os = "android", all(target_os = "linux", target_arch = "aarch64")))'.dependencies]
+rustls = { version = "0.23", default-features = false, features = ["std"] }
+rustls-rustcrypto = "0.0.2-alpha"
+
+[[example]]
+name = "netsim"
+path = "examples/netsim.rs"

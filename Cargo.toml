@@ -1,0 +1,35 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+# Third-party checkouts (ext/warpzone is a path dependency of baba-net) keep
+# their own workspaces; crates/vendor holds patched third-party crates.
+exclude = ["ext", "crates/vendor"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/jarvis-jhk/baba-port"
+
+[profile.release]
+debug = 1
+
+[profile.dev.package."*"]
+opt-level = 2
+
+# Size-optimised release for the Android APK and the PortMaster port
+# (scripts/android/build.sh, scripts/portmaster/build.sh).
+[profile.dist]
+inherits = "release"
+opt-level = "s"
+lto = "fat"
+codegen-units = 1
+debug = 0
+strip = true
+
+# ureq without ring in its `rustls` feature (ring needs a C compiler; the
+# Android and PortMaster builds have none). Desktop targets turn ring back on
+# through baba-net; the others get a pure-Rust rustls provider
+# (crates/vendor/ureq/Cargo.toml, docs/platform-android.md "TLS").
+[patch.crates-io]
+ureq = { path = "crates/vendor/ureq" }

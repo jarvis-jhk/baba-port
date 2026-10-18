@@ -1,0 +1,57 @@
+# M7 online through the menus: m0 opens Online from the main menu and hosts
+# a public room; m1 opens the multiplayer join screen, seats a controller,
+# goes online from there (O) with that player, finds the room in the room
+# browser and joins it; both ready, the session starts, the host ends it.
+size 1280x720
+# The first launch plays the intro: hold a key to skip it.
+wait 150
+hold enter 70
+idle 400
+idle
+solve
+idle 900
+expect state play baba/106level (map)
+key escape
+key down 3
+key enter
+idle
+expect state title
+@m0 key down 5
+@m0 key enter
+@m1 key down 4
+@m1 key enter
+@m1 expect state join Coop players=0
+@m1 pads 1
+@m1 pad 1 a
+@m1 expect state join Coop players=1
+@m1 key o
+expect state menu=Online(Main)
+online wait 30 signed=true
+shot 01-online-menu
+@m0 key down
+@m0 key enter
+@m0 online wait 30 online room
+@m0 online seats 1
+@m0 shot 02-public-room
+@m0 online touch ${STARTED}
+@m1 online wait-file ${STARTED} 60
+@m1 key down 3
+@m1 key enter
+@m1 expect state menu=Online(Rooms)
+@m1 wait 120
+@m1 key enter
+@m1 wait 120
+@m1 shot 02-room-browser
+@m1 key down 2
+@m1 key enter
+@m1 online wait 30 online room
+@m1 online wait 30 machines=2
+@m1 pad 1 a
+@m1 shot 03-joined-room
+online wait 60 online session
+online settle 20
+shot 04-session
+@m0 online end
+online wait 60 online room
+online expect agreed
+quit

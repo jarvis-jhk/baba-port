@@ -1,0 +1,30 @@
+[package]
+name = "baba-android"
+description = "baba-port on Android: NativeActivity entry point (libbabaport.so), game data import, the game App on the Android platform"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+# libbabaport.so, loaded by android.app.NativeActivity (android.app.lib_name =
+# babaport). Built by scripts/android/build.sh; on other targets the entry
+# point is compiled out and only the platform-neutral helpers build.
+[lib]
+name = "babaport"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# The game without its SDL2 desktop backend.
+baba-port = { path = "../game", default-features = false }
+baba-render = { path = "../render", default-features = false }
+baba-platform = { path = "../platform", default-features = false, features = ["android"] }
+baba-net = { path = "../net" }
+log = "0.4"
+
+[dev-dependencies]
+# tests/import_layouts.rs: the imported folder is a working install.
+baba-formats = { path = "../formats" }
+
+[target.'cfg(target_os = "android")'.dependencies]
+zip = { version = "9", default-features = false, features = ["deflate"] }

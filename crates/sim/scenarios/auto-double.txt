@@ -1,0 +1,20 @@
+# AUTO twice (two LEVEL IS AUTO rules: two move phases per tick), and
+# breaking one of them; YOU2 units move with player 2's (idle) direction.
+inputs: RARAUAUALLAADDARRRAZAZA
+layer:
+L I A . . . . . .
+L I A . . . . . .
+. . . . . . . . .
+. . b . . . . k .
+. . . . . . . . .
+B I Y . K I Z . .
+legend:
+L text_level
+I text_is
+A text_auto
+B text_baba
+Y text_you
+K text_keke
+Z text_you2
+b baba
+k keke <

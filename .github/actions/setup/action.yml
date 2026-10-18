@@ -1,0 +1,53 @@
+name: Rust toolchain in tools/ + the Warpzone checkout
+description: >
+  Checks out warpzone (a path dependency of baba-net, ext/warpzone, pinned
+  below), installs rustup + the pinned Rust toolchain into ./tools (where
+  env.sh and the project scripts expect it, so they run unchanged on a
+  runner) and exports RUSTUP_HOME / CARGO_HOME / PATH for later steps.
+inputs:
+  components:
+    description: Comma-separated rustup components
+    default: ""
+  targets:
+    description: Comma-separated extra targets
+    default: ""
+  cache-key:
+    description: Cache key suffix (one per job kind)
+    default: default
+runs:
+  using: composite
+  steps:
+    # Same commit as the local ext/warpzone checkout (docs/net.md). It must
+    # be on GitHub for this to work (see docs/STATUS.md, M11).
+    - name: Warpzone (ext/warpzone)
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        repository: jarvis-jhk/warpzone
+        ref: c967f5c1b2f7c41ff66d4c16e7b4197440beee8b
+        path: ext/warpzone
+        persist-credentials: false
+    - name: Install rustup and the toolchain into tools/
+      shell: bash
+      env:
+        COMPONENTS: ${{ inputs.components }}
+        TARGETS: ${{ inputs.targets }}
+        # The toolchain the project is developed with (rustc --version).
+        TOOLCHAIN: "1.99.1"
+      run: |
+        export RUSTUP_HOME="$PWD/tools/rustup" CARGO_HOME="$PWD/tools/cargo"
+        extra=()
+        [ -n "$COMPONENTS" ] && extra+=(-c "$COMPONENTS")
+        [ -n "$TARGETS" ] && extra+=(-t "$TARGETS")
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+          | sh -s -- -y --no-modify-path --profile minimal --default-toolchain "$TOOLCHAIN" "${extra[@]}"
+        {
+          echo "RUSTUP_HOME=$RUSTUP_HOME"
+          echo "CARGO_HOME=$CARGO_HOME"
+          echo "CARGO_TERM_COLOR=always"
+        } >> "$GITHUB_ENV"
+        echo "$CARGO_HOME/bin" >> "$GITHUB_PATH"
+    - name: Cache registry and build output
+      uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      with:
+        shared-key: ${{ inputs.cache-key }}
+        cache-bin: false

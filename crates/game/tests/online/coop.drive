@@ -1,0 +1,47 @@
+# M7 online, mode 1 (co-op): ${MACHINES} machines with ${LOCALS} local
+# players each (virtual controllers) drive one level instance; every turn
+# goes through the host. m0 hosts a private room, m1 joins with the code,
+# the others with the invite link (the launcher path). m1 solves 0level,
+# m0 walks to 1level and enters it, m1 solves it, then every player
+# presses at once; the host ends the session and every machine must agree
+# on the final state. Run by scripts/net/online-test.sh.
+size 1280x720
+# The first launch plays the intro: hold a key to skip it.
+wait 150
+hold enter 70
+idle 400
+expect state play baba/0level
+@host online host private ${ROOMFILE}
+@m1 online join code ${ROOMFILE}
+@!m0,m1 online join invite ${ROOMFILE}
+@host online wait 90 machines=${MACHINES}
+@host online mode coop
+online seats ${LOCALS}
+@host shot 01-room
+online wait 90 online session
+online wait 60 players=${PLAYERS}
+online settle 30
+shot 02-session
+@m1 l1 idle 900
+@m1 l1 solve
+online wait 90 baba/106level (map)
+online settle 30
+@m0 l1 idle 900
+@m0 l1 walk 1level
+@m0 l1 press wait
+online wait-level 60 l1 baba/1level
+online settle 30
+@m1 l1 idle 900
+@m1 l1 solve
+online wait-icon 90 l1 1level 3
+online settle 30
+shot 03-after-win
+online bots 8
+online settle 60
+shot 04-bots
+@host online end
+online wait 90 online room
+online expect agreed
+@host expect save 0 baba 1level 3
+shot 05-room-after
+quit

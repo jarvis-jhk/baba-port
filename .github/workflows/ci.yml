@@ -1,0 +1,92 @@
+# Checks on every push and pull request: no game data in the repository,
+# formatting, clippy, the tests that need no game install, and release
+# archives for all five platforms (build.yml; uploaded as workflow artifacts
+# only, never published). Not yet run on GitHub (docs/STATUS.md, M11).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: "1"
+
+jobs:
+  no-game-data:
+    name: no game data in the repository
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # git ls-files; no install on the runner: type/content/size/Lua rules.
+      - run: scripts/check-no-game-data.sh
+
+  fmt:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          components: rustfmt
+          cache-key: fmt
+      - run: cargo fmt --all -- --check
+
+  clippy:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: System packages
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libsdl2-dev
+      - uses: ./.github/actions/setup
+        with:
+          components: clippy
+          cache-key: clippy
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      # The Android entry point and backend only compile for Android.
+      - run: |
+          rustup target add aarch64-linux-android
+          cargo clippy --locked --target aarch64-linux-android -p baba-android -- -D warnings
+
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: System packages (SDL2, Mesa EGL/GLES for the headless renderer tests)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libsdl2-dev libegl1 libegl-mesa0 libgl1-mesa-dri libgles2
+      - uses: ./.github/actions/setup
+        with:
+          cache-key: test
+      # No game data in the repository or on the runner: tests that need the
+      # install ($BABA_GAME_DIR), the reference captures or the TAS corpus
+      # (ref/) skip themselves; everything else runs. The renderer's GL tests
+      # must not skip (llvmpipe through EGL surfaceless).
+      - name: cargo test
+        env:
+          BABA_REQUIRE_GL: "1"
+          SDL_VIDEODRIVER: offscreen
+          SDL_AUDIODRIVER: dummy
+        run: |
+          source env.sh
+          cargo test --workspace --locked
+
+  build:
+    uses: ./.github/workflows/build.yml

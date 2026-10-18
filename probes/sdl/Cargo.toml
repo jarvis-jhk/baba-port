@@ -1,0 +1,28 @@
+# Desktop/PortMaster platform probe: SDL2 window + GLES2 (or GL 2.1) through
+# glow, a textured quad, an SDL audio beep, controller logging (plus an SDL
+# virtual controller for headless tests), headless screenshot check.
+# Built by scripts/{portmaster,windows,macos}/; its own workspace.
+[package]
+name = "baba-sdl-probe"
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[dependencies]
+sdl2 = "0.38"
+glow = "0.18"
+
+# macOS: link SDL2.framework (the official release's universal framework,
+# bundled into the .app by .github/workflows/macos.yml).
+[target.'cfg(target_os = "macos")'.dependencies]
+sdl2 = { version = "0.38", features = ["use_mac_framework"] }
+
+[workspace]
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

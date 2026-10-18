@@ -1,0 +1,44 @@
+# First launch on an empty data directory (ui.md §1.2): no menu, slot 0
+# starts the base world in its first level with the intro cutscene
+# (progression.md §10.4); watch its start, skip the rest by holding a key,
+# solve the level, return to the map, check the save, open the pause menu.
+size 854x480
+wait 20
+shot 01-boot
+wait 200
+expect log first launch
+expect log intro
+expect state play baba/0level
+expect state cutscene=intro
+wait 300
+shot 02-intro-flower
+wait 100
+expect sound intro_reveal_1f
+expect sound intro_disappear_1
+shot 02b-intro-reveal
+hold enter 70
+idle 300
+expect log intro skipped
+shot 03-level0
+expect music baba
+moves RRR
+shot 04-level0-moved
+moves ZZ
+solve
+idle 900
+expect log win 0level
+expect state play baba/106level (map)
+expect sound winnery_fast
+shot 05-map-after-win
+expect save 0 baba 0level 3
+expect save 0 baba_prize 106level 1
+expect save 0 baba_prize total 1
+expect save 0 baba Previous 0level
+expect save 0 baba leveltree 106level
+expect save global baba firsttime 1
+expect save settings savegame world baba
+key escape
+idle
+shot 06-pause-map
+key escape
+quit

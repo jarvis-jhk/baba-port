@@ -1,0 +1,170 @@
+# M8: a levelpack with a map, made in the editor and then played through
+# the normal pack path. Edit levelpacks → Create a new levelpack →
+# a level (BABA IS YOU / FLAG IS WIN) and a map (map setup, a level icon
+# leading to the level, opened, numbered; a path; the map cursor) → the
+# pack's world map → leave the editor → Play levels → Play levelpacks →
+# the pack's map → enter the level by its icon → win → the icon is
+# completed on the map. Runs after 1-create and 2-tutorial-pad on the same data dir
+# (the data dir holds the levels world, so the new pack is 1world).
+size 854x480
+idle 300
+expect state title menu=Main
+key down
+key enter
+wait 5
+expect state menu=Editor(Start)
+key down
+key enter
+expect state menu=Editor(Packs { page: 0 })
+key down
+key enter
+type Drive pack
+key enter
+wait 2
+expect log pack created 1world
+expect state menu=Editor(Levels { page: 0 })
+expect file worlds/1world/world_data.txt name=Drive pack
+shot 50-pack-levels
+
+# The level.
+key down 3
+key right
+key enter
+type Pack level
+key enter
+key enter
+wait 2
+expect state editor Main level=1world/0level
+key 2
+click 364 467
+cell 4 4
+key 1
+cell 5 4
+key 3
+cell 6 4
+key 4
+click 364 467
+cell 10 4
+key 1
+cell 11 4
+key 5
+cell 12 4
+key 2
+click 364 467
+cell 5 9
+key 4
+click 364 467
+cell 9 9
+key ctrl+s
+wait 2
+expect file worlds/1world/0level.ld name=Pack level
+key backspace
+wait 2
+expect state menu=Editor(Levels { page: 0 })
+
+# The map: map setup (type Map), an opened level icon numbered 1 leading
+# to the level, a path, the cursor on the icon.
+key down 3
+key right
+key enter
+type Pack map
+key enter
+key enter
+wait 2
+expect state editor Main level=1world/1level
+key f1
+key up
+key enter
+expect state menu=Editor(MapSetup)
+key down
+key right
+key enter
+expect log editor
+key escape
+key escape
+wait 2
+key tab
+expect state editor Palette
+click 734 323
+expect state editor Main
+expect state brush=Levels
+cell 10 9
+expect state menu=Editor(LevelSetup)
+shot 51-levelsetup-new
+key down
+key enter
+expect state menu=Editor(PickLevel
+key down
+key enter
+expect state menu=Editor(LevelSetup)
+key down 2
+key right 2
+key enter
+key down 2
+key right
+key enter
+shot 52-levelsetup
+key escape
+wait 2
+key tab
+click 734 349
+cell 11 9
+cell 12 9
+key tab
+click 734 401
+cell 10 9
+expect state brush=Cursor
+key tab
+click 734 297
+expect state brush=Objects
+key tab
+expect state editor Main
+shot 53-map
+key ctrl+s
+wait 2
+expect file worlds/1world/1level.ld leveltype=1
+expect file worlds/1world/1level.ld 0file=0level
+expect file worlds/1world/1level.ld 0state=2
+expect file worlds/1world/1level.ld 0number=1
+expect file worlds/1world/1level.ld selectorX=10
+expect file worlds/1world/1level.ld 1style=1
+key backspace
+wait 2
+
+# The pack's world map.
+key down 2
+key right
+key enter
+key down 3
+key enter
+expect log pack start=1level
+expect file worlds/1world/world_data.txt start=1level
+shot 54-pack-list
+
+# Leave the editor and play the pack.
+key escape
+key escape
+key escape
+wait 2
+expect state title menu=Main
+key right
+key enter
+expect state menu=Ext(PlayLevels)
+key down
+key enter
+expect state menu=Packs
+key down
+key enter
+idle 600
+expect state play 1world/1level (map)
+shot 55-pack-map
+key enter
+idle 600
+expect state play 1world/0level
+moves RRRR
+idle 900
+expect log win 0level
+idle 900
+expect state play 1world/1level (map)
+p1 expect icon 0level 3
+shot 56-pack-won

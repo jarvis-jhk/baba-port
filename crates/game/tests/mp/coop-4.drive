@@ -1,0 +1,50 @@
+# M6 mode 1 (co-op) with four players: three virtual controllers and the
+# keyboard's right half (P4, arrows). Every player moves; same-tick
+# presses on three controllers become turns in SDL delivery order.
+size 854x480
+# The first launch plays the intro: hold a key to skip it.
+wait 150
+hold enter 70
+idle 400
+solve
+idle 900
+key escape
+key down 3
+key enter
+idle
+key down 4
+key enter
+expect state join
+pads 3
+pad 1 a
+pad 2 a
+pad 3 a
+key enter
+expect state join Coop players=4
+expect log join p4 keys right
+pad 1 a
+pad 2 a
+pad 3 a
+key enter
+wait 50
+expect state multi Coop players=4 views=1 | v0 p1,p2,p3,p4
+idle
+p1 press up
+p2 press down
+p3 press up
+p4 press down
+p4 press up
+expect log turn p4 Move { dir: 1, you: 2 }
+chord up 1 2 3
+chord down 3 2 1
+shot 01-coop-4
+p4 press pause
+expect state menu=Pause
+shot 02-coop-4-pause-p4
+p4 press back
+p1 press pause
+p1 press down 3
+p1 press wait
+idle
+expect state title
+quit

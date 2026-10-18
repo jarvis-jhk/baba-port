@@ -1,0 +1,70 @@
+# Second launch on the data directory of 1-fresh.drive: title screen and
+# menus, slot and pack selection, the map, walking the cursor, entering
+# level 0 again (title card), solving it, a level's pause menu, return to
+# map, settings, return to the title. Captures of the original are in
+# ${BABA_REF}.
+size 854x480
+idle 300
+expect state title
+expect music menu
+shot 10-title
+compare 10-title ${BABA_REF}/title-menu.png
+key down
+key enter
+idle
+expect state menu=Slots
+shot 11-slots
+key enter
+expect state menu=Packs
+shot 12-packs
+key enter
+idle 600
+expect state play baba/106level (map)
+shot 13-map
+compare 13-map ${BABA_REF}/baba-map-after-win.png
+walk 1level
+shot 14-map-cursor-1level
+walk 0level
+key enter
+wait 70
+shot 15-titlecard
+compare 15-titlecard ${BABA_REF}/level-titlecard.png
+idle
+expect state play baba/0level
+expect log enter 0level
+expect save 0 baba 0level_intro 1
+solve
+idle 900
+expect state play baba/106level (map)
+expect save 0 baba_prize total 1
+walk 1level
+key enter
+idle
+expect state play baba/1level
+key escape
+expect state menu=Pause
+shot 16-pause-level
+compare 16-pause-level ${BABA_REF}/pause.png
+key down
+key enter
+idle
+expect state play baba/106level (map)
+expect save 0 baba Previous 1level
+expect save 0 baba 1level_intro 1
+key escape
+key down
+key down
+key enter
+expect state menu=Settings
+shot 17-settings
+key left
+expect save settings settings music 60
+key escape
+key escape
+key escape
+key up
+key enter
+idle
+expect state title
+shot 18-title-again
+quit
