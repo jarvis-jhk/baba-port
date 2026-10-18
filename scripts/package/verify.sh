@@ -52,7 +52,11 @@ linux)
     if [ -d "$P/lib" ]; then
         grep -q "$P/lib/libSDL2" "$V/ldd.txt" || fail "bundled SDL2 not used"
     fi
-    grep -q 'not found' "$V/ldd.txt" && fail "unresolved libraries"
+    if grep -q 'not found' "$V/ldd.txt"; then
+        { echo "LD_LIBRARY_PATH=$LDP"; ls -la "$P" "$P/lib" 2>&1; file "$P"/lib/* 2>&1
+          LD_LIBRARY_PATH="$LDP" ldd "$P/baba-port"; } >&2
+        fail "unresolved libraries"
+    fi
     echo "glibc needed: $(pkg_max_glibc "$P/baba-port")"
     # The no-data screen: a fresh HOME (nothing to find), own data dir.
     run() {
