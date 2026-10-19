@@ -66,3 +66,19 @@ State of the code: `docs/STATUS.md`; priorities: `ROADMAP.md`.
   running game ignores the new intent (singleTask, NativeActivity has no
   onNewIntent); the launcher's CLEAR_TOP does not restart it.
 - Private APK 0.1.0+p4 (versionCode 10004) published.
+
+## 2026-10-19 — Warpzone 0.1.9 launcher identity
+
+- Warpzone lane asked (report API, t_mvfk1dgegd8l4): adopt the Android
+  launcher's `warpzone.identity` extra. Done: ext/warpzone and the CI
+  checkout re-pinned to b7640d8 (v0.1.9); `data::warpzone_launch` reads the
+  extra (struct no longer `Debug`, so the seed cannot be logged) and
+  `android_main` calls `launch::adopt_identity` before any client exists.
+  Also found: warpzone-core's home has no Android case (HOME unset → a
+  relative `.warpzone`), so the Android entry now sets `WARPZONE_HOME` to
+  `<files>/warpzone` unless set. Same limit as `warpzone.args`: only read
+  at a fresh start (no onNewIntent in NativeActivity).
+- Not tested on a device (tablet outside this worker's gateway scope);
+  tablet test: `am start -n org.babaport/android.app.NativeActivity --es
+  warpzone.identity <64 hex>` then check `files/warpzone/identity.key`.
+- Private APK 0.1.0+p5 (versionCode 10005) published.

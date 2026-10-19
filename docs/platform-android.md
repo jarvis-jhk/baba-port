@@ -138,7 +138,12 @@ them through JNI at start (server and "launched" become `WARPZONE_SERVER` /
 `WARPZONE_LAUNCHED`, as on desktop), removes `warpzone.args` from the
 intent, and the args go to `App::launch_online` (join by room, code or
 both). The launcher has no account and never joined the room first, so a
-private room comes with its code or invite link. Same limitation as the zip
+private room comes with its code or invite link. Warpzone >= 0.1.9 also
+passes `warpzone.identity` (hex Ed25519 seed) when the player set a name in
+the launcher; it is handed to `warpzone_core::launch::adopt_identity`
+before any client exists, so baba plays as the launcher's player (a
+different old key is kept as `identity.key.old`). The seed is never
+logged. Same limitation as the zip
 import: a game that is already running does not see the new intent
 (`singleTask`, no `onNewIntent` without Java); it acts on the arguments
 only when started fresh.

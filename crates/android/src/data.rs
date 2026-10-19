@@ -105,13 +105,15 @@ pub fn intent_file(app: &AndroidApp) -> Option<(String, File)> {
 /// What the Warpzone launcher asked for: the launch intent's string-array
 /// extra `warpzone.args` (the desktop command line: `--warpzone-join`,
 /// `--warpzone-host`, `--warpzone-code`), `warpzone.launched` and
-/// `warpzone.server`. Removes `warpzone.args` from the intent, so a
-/// re-created activity does not join again.
-#[derive(Debug, Default)]
+/// `warpzone.server`, and `warpzone.identity` (the player picked in the
+/// launcher: a hex Ed25519 seed). Removes `warpzone.args` from the intent,
+/// so a re-created activity does not join again.
+#[derive(Default)]
 pub struct WarpzoneLaunch {
     pub args: Vec<String>,
     pub launched: bool,
     pub server: Option<String>,
+    pub identity: Option<String>,
 }
 
 pub fn warpzone_launch(app: &AndroidApp) -> WarpzoneLaunch {
@@ -158,10 +160,22 @@ pub fn warpzone_launch(app: &AndroidApp) -> WarpzoneLaunch {
             )
             .and_then(|s| e.string(s))
             .filter(|s| !s.is_empty());
+        let key = e.new_string("warpzone.identity")?;
+        let identity = e
+            .call_obj(
+                intent,
+                c"getStringExtra",
+                c"(Ljava/lang/String;)Ljava/lang/String;",
+                &[Arg::Obj(key)],
+            )
+            .and_then(|s| e.string(s))
+            .map(|s| s.trim().to_owned())
+            .filter(|s| !s.is_empty());
         Some(WarpzoneLaunch {
             args,
             launched,
             server,
+            identity,
         })
     })
     .unwrap_or_default()

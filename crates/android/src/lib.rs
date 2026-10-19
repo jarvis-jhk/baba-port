@@ -18,7 +18,8 @@
 //! Warpzone: the Android launcher starts the activity with the extra
 //! `warpzone.args` (`--warpzone-join`, `--warpzone-host`,
 //! `--warpzone-code`), handed to [`App::launch_online`](baba_game::App)
-//! like the desktop command line (`data::warpzone_launch`).
+//! like the desktop command line (`data::warpzone_launch`); its
+//! `warpzone.identity` (the launcher's player) is adopted at start.
 //!
 //! Test switches (system properties, root `setprop`):
 //! `debug.babaport.nettest 1` fetches the Warpzone server's public info over
@@ -141,14 +142,28 @@ mod entry {
         if wz.launched {
             unsafe { std::env::set_var("WARPZONE_LAUNCHED", "1") };
         }
-        baba_net::tls::install_crypto_provider();
-        if system_property("debug.babaport.nettest").as_deref() == Some("1") {
-            std::thread::spawn(net_check);
-        }
         let Some(dirs) = data::Dirs::of(&app) else {
             log::error!("no app data directory");
             return;
         };
+        // warpzone-core's default home has no Android case (HOME is unset
+        // or "/" here): keep the identity in the app's private files.
+        if std::env::var_os("WARPZONE_HOME").is_none() {
+            unsafe { std::env::set_var("WARPZONE_HOME", dirs.internal.join("warpzone")) };
+        }
+        // The player picked in the launcher becomes this device's identity
+        // before any Warpzone client exists (the seed is never logged).
+        if let Some(hex) = &wz.identity {
+            match baba_net::warpzone_core::launch::adopt_identity(hex) {
+                Ok(true) => log::info!("warpzone launch: adopted the launcher's identity"),
+                Ok(false) => {}
+                Err(e) => log::error!("warpzone launch: identity not adopted: {e}"),
+            }
+        }
+        baba_net::tls::install_crypto_provider();
+        if system_property("debug.babaport.nettest").as_deref() == Some("1") {
+            std::thread::spawn(net_check);
+        }
         crash::init(
             dirs.internal.clone(),
             format!(
