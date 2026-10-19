@@ -17,6 +17,8 @@ Up to twelve players in any mix of controllers and machines, in three ways to pl
 Warpzone brings public and private rooms, join codes, invite links, NAT traversal and spectators. If the host leaves, the others carry on with a new host."""
 homepage = "https://github.com/jarvis-jhk/baba-port"
 accent = "#d9396a"
+# Launcher library tile (Warpzone >= 0.1.3; older servers reject the field).
+steamgriddb = 22797   # Baba Is You
 motif = "blocks"
 tier = 2
 local_players = 12

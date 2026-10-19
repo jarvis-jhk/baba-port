@@ -39,3 +39,13 @@ State of the code: `docs/STATUS.md`; priorities: `ROADMAP.md`.
 - Waiting on the owner: the tablet test list (touch keyboard, launcher icon,
   fault report, Windows/Mac zip import), the go for a full release, M12
   (handheld, last).
+
+## 2026-10-19 — SteamGridDB tile
+
+- Warpzone lane asked (report API) for `steamgriddb = 22797` in the
+  descriptor for the 0.1.3 launcher's library tiles; added after `accent` in
+  `packaging/warpzone/baba-port.toml`. Servers <= 0.1.2 reject the field, and
+  `ext/warpzone` here is older, so `scripts/net/dev-server.sh --check` fails
+  on it until ext/warpzone is updated to 0.1.3. The live copy
+  (`games/baba-port.toml` in the warpzone repo) is the warpzone lane's: asked
+  it to sync once warpzone-server 0.1.3 runs on vtt.
