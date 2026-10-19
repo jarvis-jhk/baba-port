@@ -456,7 +456,7 @@ maintainer log: `NOTES.md` (JARVIS owns the project since 2026-10-18).
       Windows under Wine, Android, PortMaster under qemu; macOS smoke test
       and `codesign --verify`; `--checks-only` over all archives with the
       no-game-data check and the descriptor), green on 560cd34 and later.
-      v0.1.0 stays a prerelease; a full release waits for the owner.
+      v0.1.0 and v0.1.1 (2026-10-19, the Android Warpzone home fix) are prereleases; a full release waits for the owner.
 - [ ] M12 Final check on the `gameboy` handheld (only after everything else).
 
 ## Workstreams in flight

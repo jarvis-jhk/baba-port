@@ -92,7 +92,7 @@ checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
 
 [[package]]
 name = "baba-android"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "baba-formats",
  "baba-http",
@@ -106,7 +106,7 @@ dependencies = [
 
 [[package]]
 name = "baba-formats"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "miniz_oxide 0.8.9",
  "png",
@@ -114,7 +114,7 @@ dependencies = [
 
 [[package]]
 name = "baba-http"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "log",
  "rustls",
@@ -124,7 +124,7 @@ dependencies = [
 
 [[package]]
 name = "baba-net"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "bincode",
  "log",
@@ -137,7 +137,7 @@ dependencies = [
 
 [[package]]
 name = "baba-platform"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "android-activity",
  "glow",
@@ -151,7 +151,7 @@ dependencies = [
 
 [[package]]
 name = "baba-port"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "ab_glyph",
  "baba-formats",
@@ -168,7 +168,7 @@ dependencies = [
 
 [[package]]
 name = "baba-progress"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "baba-formats",
  "log",
@@ -176,7 +176,7 @@ dependencies = [
 
 [[package]]
 name = "baba-render"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "glow",
  "khronos-egl",
@@ -186,14 +186,14 @@ dependencies = [
 
 [[package]]
 name = "baba-sim"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "baba-formats",
 ]
 
 [[package]]
 name = "baba-solver"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "baba-formats",
  "baba-sim",
