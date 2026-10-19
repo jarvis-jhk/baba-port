@@ -31,17 +31,21 @@ github = "jarvis-jhk/baba-port"
 prerelease = true
 checksums = "SHA256SUMS"
 # The release assets of scripts/package.sh (which checks these globs and
-# the exec paths below against the archives it builds). Android
-# (baba-port-*-android-arm64.apk) and macOS (baba-port-*-macos-universal.zip)
-# are on the release page too; the launcher's platform keys are linux,
-# appimage, windows, deck and portmaster (download only). The found game
+# the exec paths below against the archives it builds). macOS
+# (baba-port-*-macos-universal.zip) is on the release page too; the
+# launcher's platform keys are linux, appimage, windows, deck, portmaster
+# (download only) and android (Warpzone >= 0.1.6: the Android launcher
+# installs the APK, checked against SHA256SUMS; one signing key across
+# releases). The found game
 # data reaches the game as WARPZONE_DATA_BABA (crates/game/src/gamedir.rs).
-assets ={ linux = "baba-port-*-linux-x86_64.tar.gz", deck = "baba-port-*-linux-x86_64.tar.gz", windows = "baba-port-*-windows-x86_64.zip", portmaster = "baba-port-*-portmaster.zip" }
+assets ={ linux = "baba-port-*-linux-x86_64.tar.gz", deck = "baba-port-*-linux-x86_64.tar.gz", windows = "baba-port-*-windows-x86_64.zip", portmaster = "baba-port-*-portmaster.zip", android = "baba-port-*-android-arm64.apk" }
 
 [launch]
 # Linux: play.sh (bundled libraries, then exec the binary with every
-# argument). Windows: the exe with SDL2.dll beside it.
-exec = { linux = "baba-port-*/play.sh", deck = "baba-port-*/play.sh", windows = "baba-port-*/baba-port.exe" }
+# argument). Windows: the exe with SDL2.dll beside it. Android: the package;
+# the launcher passes join/host/code as the intent extra warpzone.args
+# (crates/android/src/data.rs).
+exec = { linux = "baba-port-*/play.sh", deck = "baba-port-*/play.sh", windows = "baba-port-*/baba-port.exe", android = "org.babaport" }
 join = ["--warpzone-join", "{room}"]
 host = ["--warpzone-host"]
 

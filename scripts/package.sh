@@ -86,6 +86,12 @@ for plat, glob in assets.items():
     if plat not in execs:
         print(f"{plat}: {f}: asset glob {glob!r} ok (download only)")
         continue
+    if f.endswith(".apk"):
+        # Android: exec is the package the launcher starts.
+        ok = execs[plat] == "org.babaport"
+        print(f"{plat}: {f}: asset glob {glob!r} ok, package {execs[plat]!r} {'ok' if ok else 'WRONG'}")
+        bad += not ok
+        continue
     p = os.path.join(dist, f)
     names = zipfile.ZipFile(p).namelist() if f.endswith(".zip") else \
         [m.name for m in tarfile.open(p).getmembers()]

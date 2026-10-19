@@ -136,6 +136,10 @@ pub enum LaunchAction {
     Joining {
         room: String,
     },
+    /// A join by code (`--warpzone-code`) is under way.
+    JoiningCode {
+        code: String,
+    },
     /// Open the host screen (then [`NetSession::host`]).
     HostScreen,
 }
@@ -552,12 +556,16 @@ impl NetSession {
     }
 
     /// Act on `--warpzone-join <room>`, invite links, `WARPZONE_JOIN`,
-    /// `--warpzone-host` / `WARPZONE_HOST=1`.
+    /// `--warpzone-code <CODE>`, `--warpzone-host` / `WARPZONE_HOST=1`.
     pub fn handle_launch<A: AsRef<str>>(&mut self, args: &[A]) -> LaunchAction {
         let intent = warpzone_core::launch::from_args(args);
         if let Some(room) = intent.join {
-            self.join(&room, None, intent.secret.as_deref());
+            self.join(&room, intent.code.as_deref(), intent.secret.as_deref());
             return LaunchAction::Joining { room };
+        }
+        if let Some(code) = intent.code {
+            self.join_code(&code);
+            return LaunchAction::JoiningCode { code };
         }
         if intent.host {
             LaunchAction::HostScreen

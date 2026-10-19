@@ -406,7 +406,10 @@ maintainer log: `NOTES.md` (JARVIS owns the project since 2026-10-18).
       (tag = Cargo version, release-key APK from secrets, **draft**
       release only). Locally green: fmt, workspace clippy, every archive.
       Warpzone re-pinned to `c967f5c` (on GitHub, the same commit as the
-      other ports; baba-net tests and clippy pass against it).
+      other ports; baba-net tests and clippy pass against it); 2026-10-19
+      to `85f8376` (0.1.6: Android launcher, `--warpzone-code`; the
+      descriptor lists the APK and `org.babaport`, the Android entry reads
+      the intent extra `warpzone.args`, docs/platform-android.md).
       Published 2026-10-18: github.com/jarvis-jhk/baba-port (public, fresh
       history), specs in the private `jarvis-jhk/baba-port-spec`
       (`docs/spec/`), Android release key in the repository secrets,

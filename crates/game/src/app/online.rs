@@ -65,7 +65,8 @@ pub enum OnAct {
 enum Want {
     Host(bool),
     Code(String),
-    Join(String, Option<String>),
+    /// Room, its code (a listed room that wants one), invite secret.
+    Join(String, Option<String>, Option<String>),
     List,
 }
 
@@ -246,11 +247,12 @@ impl App {
         self.log.push("online menu".into());
     }
 
-    /// `--warpzone-host` / `--warpzone-join <room|invite>` (the launcher,
-    /// an invite link).
+    /// `--warpzone-host` / `--warpzone-join <room|invite>` /
+    /// `--warpzone-code <CODE>` (the launcher, an invite link; on Android
+    /// the launch intent's `warpzone.args`).
     pub fn launch_online(&mut self, args: &[String]) {
         let intent = baba_net::warpzone_core::launch::from_args(args);
-        if intent.join.is_none() && !intent.host {
+        if intent.join.is_none() && intent.code.is_none() && !intent.host {
             return;
         }
         self.open_online(None);
@@ -258,7 +260,10 @@ impl App {
             return;
         }
         if let Some(room) = intent.join {
-            self.online.want = Some(Want::Join(room, intent.secret));
+            self.online.want = Some(Want::Join(room, intent.code, intent.secret));
+            self.push_wait("Joining the room...");
+        } else if let Some(code) = intent.code {
+            self.online.want = Some(Want::Code(code));
             self.push_wait("Joining the room...");
         } else {
             self.log.push("online: host screen".into());
@@ -315,7 +320,7 @@ impl App {
                 }
             }
             Want::Code(c) => net.join_code(&c),
-            Want::Join(room, secret) => net.join(&room, None, secret.as_deref()),
+            Want::Join(room, code, secret) => net.join(&room, code.as_deref(), secret.as_deref()),
             Want::List => net.list_rooms(false),
         }
     }
@@ -356,7 +361,9 @@ impl App {
                 self.online_want(Want::List, "");
             }
             OnAct::Refresh => self.online_want(Want::List, ""),
-            OnAct::JoinRoom(id) => self.online_want(Want::Join(id, None), "Joining the room..."),
+            OnAct::JoinRoom(id) => {
+                self.online_want(Want::Join(id, None, None), "Joining the room...")
+            }
             OnAct::Cancel => {
                 self.menus.pop();
                 if let Some(net) = &mut self.online.net
@@ -1384,7 +1391,10 @@ impl App {
 
     pub fn online_join_room(&mut self, room: &str) {
         self.open_online(None);
-        self.online_want(Want::Join(room.to_string(), None), "Joining the room...");
+        self.online_want(
+            Want::Join(room.to_string(), None, None),
+            "Joining the room...",
+        );
     }
 
     /// Host (scripts): the mode of the next session.

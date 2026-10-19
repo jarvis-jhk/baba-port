@@ -102,6 +102,71 @@ pub fn intent_file(app: &AndroidApp) -> Option<(String, File)> {
     (fd >= 0).then(|| (uri, unsafe { File::from_raw_fd(fd) }))
 }
 
+/// What the Warpzone launcher asked for: the launch intent's string-array
+/// extra `warpzone.args` (the desktop command line: `--warpzone-join`,
+/// `--warpzone-host`, `--warpzone-code`), `warpzone.launched` and
+/// `warpzone.server`. Removes `warpzone.args` from the intent, so a
+/// re-created activity does not join again.
+#[derive(Debug, Default)]
+pub struct WarpzoneLaunch {
+    pub args: Vec<String>,
+    pub launched: bool,
+    pub server: Option<String>,
+}
+
+pub fn warpzone_launch(app: &AndroidApp) -> WarpzoneLaunch {
+    let act = app.activity_as_ptr();
+    jni::with_env(app.vm_as_ptr(), |e| {
+        let act = unsafe { e.wrap(act) };
+        let intent = e
+            .call_obj(act, c"getIntent", c"()Landroid/content/Intent;", &[])
+            .filter(|i| !i.is_null())?;
+        let key = e.new_string("warpzone.args")?;
+        let args = e
+            .call_obj(
+                intent,
+                c"getStringArrayExtra",
+                c"(Ljava/lang/String;)[Ljava/lang/String;",
+                &[Arg::Obj(key)],
+            )
+            .and_then(|a| e.string_array(a))
+            .unwrap_or_default();
+        if !args.is_empty() {
+            e.call_void(
+                intent,
+                c"removeExtra",
+                c"(Ljava/lang/String;)V",
+                &[Arg::Obj(key)],
+            );
+        }
+        let key = e.new_string("warpzone.launched")?;
+        let launched = e
+            .call_bool(
+                intent,
+                c"getBooleanExtra",
+                c"(Ljava/lang/String;Z)Z",
+                &[Arg::Obj(key), Arg::Bool(false)],
+            )
+            .unwrap_or(false);
+        let key = e.new_string("warpzone.server")?;
+        let server = e
+            .call_obj(
+                intent,
+                c"getStringExtra",
+                c"(Ljava/lang/String;)Ljava/lang/String;",
+                &[Arg::Obj(key)],
+            )
+            .and_then(|s| e.string(s))
+            .filter(|s| !s.is_empty());
+        Some(WarpzoneLaunch {
+            args,
+            launched,
+            server,
+        })
+    })
+    .unwrap_or_default()
+}
+
 /// Progress of an import (entries written / total), for the UI.
 #[derive(Clone, Default)]
 pub struct Progress {

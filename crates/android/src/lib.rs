@@ -15,6 +15,11 @@
 //! Escape (pause in play, back in menus); gamepads use the game's pad
 //! bindings, Select/Back of the pad acts as Escape too.
 //!
+//! Warpzone: the Android launcher starts the activity with the extra
+//! `warpzone.args` (`--warpzone-join`, `--warpzone-host`,
+//! `--warpzone-code`), handed to [`App::launch_online`](baba_game::App)
+//! like the desktop command line (`data::warpzone_launch`).
+//!
 //! Test switches (system properties, root `setprop`):
 //! `debug.babaport.nettest 1` fetches the Warpzone server's public info over
 //! HTTPS at start (TLS check); `debug.babaport.losectx 1` drops the GL
@@ -122,6 +127,20 @@ mod entry {
             env!("CARGO_PKG_VERSION"),
             AndroidApp::sdk_version()
         );
+        // The Warpzone launcher's extras, before any other thread runs:
+        // the server and "launched" become the environment warpzone-core
+        // reads on desktop too.
+        let wz = data::warpzone_launch(&app);
+        if wz.launched || !wz.args.is_empty() {
+            log::info!("warpzone launch: {:?} server {:?}", wz.args, wz.server);
+        }
+        if let Some(s) = &wz.server {
+            // SAFETY: no other thread of ours is running yet.
+            unsafe { std::env::set_var("WARPZONE_SERVER", s) };
+        }
+        if wz.launched {
+            unsafe { std::env::set_var("WARPZONE_LAUNCHED", "1") };
+        }
         baba_net::tls::install_crypto_provider();
         if system_property("debug.babaport.nettest").as_deref() == Some("1") {
             std::thread::spawn(net_check);
@@ -195,6 +214,7 @@ mod entry {
                 app.handle_event(&Event::ControllerAdded(d));
             }
         }
+        app.launch_online(&wz.args);
         let (mut frames, mut last_log) = (0u64, Duration::ZERO);
         loop {
             let touch = app.wants_touch_controls();

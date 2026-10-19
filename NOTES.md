@@ -49,3 +49,20 @@ State of the code: `docs/STATUS.md`; priorities: `ROADMAP.md`.
   on it until ext/warpzone is updated to 0.1.3. The live copy
   (`games/baba-port.toml` in the warpzone repo) is the warpzone lane's: asked
   it to sync once warpzone-server 0.1.3 runs on vtt.
+
+## 2026-10-19 — Warpzone 0.1.6 Android launcher
+
+- Warpzone lane asked (report API): descriptor `android` asset/exec, and
+  read the launch intent's `warpzone.args` on Android. Done: ext/warpzone
+  (and the CI checkout) re-pinned to 85f8376 (0.1.6); `--warpzone-code`
+  joins by code (alone, or with `--warpzone-join` for a listed room) on
+  desktop and Android; `warpzone.server` / `warpzone.launched` become the
+  environment warpzone-core reads. `check-games` (0.1.6 server) passes, the
+  steamgriddb note above is resolved with it. The live descriptor on vtt is
+  the warpzone lane's.
+- Not tested on a device (tablet not in this worker's gateway scope); on the
+  tablet test list: `am start -n org.babaport/android.app.NativeActivity
+  --esa warpzone.args --warpzone-code,XXXXXX`. Known limit: an already
+  running game ignores the new intent (singleTask, NativeActivity has no
+  onNewIntent); the launcher's CLEAR_TOP does not restart it.
+- Private APK 0.1.0+p4 (versionCode 10004) published.

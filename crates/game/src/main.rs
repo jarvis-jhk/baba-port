@@ -46,6 +46,8 @@ usage: baba-port [options]
                         $BABA_ROOT/ref/tas/corpus/corpus.tsv)
   --warpzone-host       open the online menu to host a room (Warpzone launcher)
   --warpzone-join ROOM  join a room (id or warpzone://join/... invite link)
+  --warpzone-code CODE  join a private room by its code (with --warpzone-join:
+                        that room's code)
   --level WORLD/FILE    show one level (viewer; default baba/0level)
   --headless            no window: render through EGL into an image
   --screenshot OUT.png  save a frame (headless, or windowed after --frames)
@@ -203,12 +205,15 @@ fn parse_args() -> Result<Args, String> {
             "--offline" => a.offline = Some(val()?.into()),
             // Online: the launcher / invite links (`App::launch_online`).
             "--warpzone-host" => a.online.push(arg.clone()),
-            "--warpzone-join" => {
+            "--warpzone-join" | "--warpzone-code" => {
                 let v = val()?;
                 a.online.push(arg.clone());
                 a.online.push(v);
             }
-            s if s.starts_with("--warpzone-join=") || s.starts_with("warpzone://") => {
+            s if s.starts_with("--warpzone-join=")
+                || s.starts_with("--warpzone-code=")
+                || s.starts_with("warpzone://") =>
+            {
                 a.online.push(arg.clone())
             }
             "-h" | "--help" => {

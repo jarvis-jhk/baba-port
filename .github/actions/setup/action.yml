@@ -23,7 +23,7 @@ runs:
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         repository: jarvis-jhk/warpzone
-        ref: c967f5c1b2f7c41ff66d4c16e7b4197440beee8b
+        ref: 85f8376479181b4e44ae4af9814e3e246539f1ab
         path: ext/warpzone
         persist-credentials: false
     - name: Install rustup and the toolchain into tools/

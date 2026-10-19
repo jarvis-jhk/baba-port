@@ -316,6 +316,7 @@ pub mod jni {
     #[derive(Clone, Copy)]
     pub enum Arg<'e> {
         Int(i32),
+        Bool(bool),
         Obj(JObject<'e>),
     }
 
@@ -323,6 +324,7 @@ pub mod jni {
         args.iter()
             .map(|a| match *a {
                 Arg::Int(i) => jvalue { i },
+                Arg::Bool(b) => jvalue { z: b as u8 },
                 Arg::Obj(o) => jvalue { l: o.0 },
             })
             .collect()
@@ -418,6 +420,21 @@ pub mod jni {
             }
         }
 
+        pub fn call_bool(
+            &self,
+            obj: JObject,
+            name: &CStr,
+            sig: &CStr,
+            args: &[Arg],
+        ) -> Option<bool> {
+            let m = self.method(obj, name, sig)?;
+            let a = values(args);
+            unsafe {
+                let r = ((**self.0).CallBooleanMethodA?)(self.0, obj.0, m, a.as_ptr());
+                self.ok(r != 0)
+            }
+        }
+
         pub fn call_void(&self, obj: JObject, name: &CStr, sig: &CStr, args: &[Arg]) -> Option<()> {
             let m = self.method(obj, name, sig)?;
             let a = values(args);
@@ -464,6 +481,25 @@ pub mod jni {
                 let r = CStr::from_ptr(p).to_string_lossy().into_owned();
                 ((**env).ReleaseStringUTFChars?)(env, s.0, p);
                 Some(r)
+            }
+        }
+
+        /// A Java `String[]` as a Vec (null elements become empty strings).
+        pub fn string_array(&self, a: JObject) -> Option<Vec<String>> {
+            if a.is_null() {
+                return None;
+            }
+            unsafe {
+                let env = self.0;
+                let n = ((**env).GetArrayLength?)(env, a.0);
+                let mut v = Vec::with_capacity(n.max(0) as usize);
+                for i in 0..n {
+                    let s = ((**env).GetObjectArrayElement?)(env, a.0, i);
+                    let s = self.ok(self.obj(s))?;
+                    v.push(self.string(s).unwrap_or_default());
+                    ((**env).DeleteLocalRef?)(env, s.0);
+                }
+                Some(v)
             }
         }
 

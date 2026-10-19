@@ -126,6 +126,23 @@ the app is already running (no `onNewIntent` forwarding): the player closes
 baba-port first. The Play Store Android version of the game keeps its data
 private, so it cannot be used.
 
+### Warpzone launcher
+
+The Android launcher (Warpzone >= 0.1.6) installs the release APK (listed
+in `SHA256SUMS`, same signing key every release) and starts `org.babaport`
+with the string-array extra `warpzone.args`: the desktop arguments
+(`--warpzone-join <room|invite>`, `--warpzone-host`, `--warpzone-code
+<CODE>`, join + code for a listed room that wants its code), plus
+`warpzone.launched` and `warpzone.server`. `data::warpzone_launch` reads
+them through JNI at start (server and "launched" become `WARPZONE_SERVER` /
+`WARPZONE_LAUNCHED`, as on desktop), removes `warpzone.args` from the
+intent, and the args go to `App::launch_online` (join by room, code or
+both). The launcher has no account and never joined the room first, so a
+private room comes with its code or invite link. Same limitation as the zip
+import: a game that is already running does not see the new intent
+(`singleTask`, no `onNewIntent` without Java); it acts on the arguments
+only when started fresh.
+
 ### Touch controls
 
 `baba_platform::touch::TouchControls` (pure logic, unit-tested) lays out a
