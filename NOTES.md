@@ -98,7 +98,7 @@ State of the code: `docs/STATUS.md`; priorities: `ROADMAP.md`.
   async), so they could go to the report API, but the game crate has no
   hook into `crates/android/src/crash.rs`; worth adding a reporter hook.
 
-## 2026-10-19 — No private releases: v0.1.1 (t_mvfz99tfihdz)
+## 2026-10-19 — No private releases: v0.1.1 (t_mvfrz99tfihdz)
 
 - Jan, on "0.1.0+p5": "don't make private releases. fix it in a new public
   release." So the WARPZONE_HOME fix (84f8f22) ships as v0.1.1 (versionCode
@@ -109,3 +109,8 @@ State of the code: `docs/STATUS.md`; priorities: `ROADMAP.md`.
   carries no game icon and no fault-report URL (both must stay out of
   public APKs), so release builds do not report faults; a public-safe
   reporting path would need Jan's say.
+- v0.1.1 published (prerelease, like every v0.*) at
+  https://github.com/jarvis-jhk/baba-port/releases/tag/v0.1.1; release.yml
+  green; the release APK (versionCode 10100, same release key as p5) is on
+  the update channel. Not tested on a device (no device in this worker's
+  gateway scope).
