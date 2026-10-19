@@ -82,3 +82,18 @@ State of the code: `docs/STATUS.md`; priorities: `ROADMAP.md`.
   tablet test: `am start -n org.babaport/android.app.NativeActivity --es
   warpzone.identity <64 hex>` then check `files/warpzone/identity.key`.
 - Private APK 0.1.0+p5 (versionCode 10005) published.
+
+## 2026-10-19 — "Can't reach Warpzone: read-only file system" (t_mvfrw90id0aj6)
+
+- Jan's report from Android (Online in the main menu). Cause: the only
+  error path of `NetSession::new` is `Client::new` → `Identity::shared()`;
+  warpzone-core's home has no Android case, so without `WARPZONE_HOME` it is
+  the relative `.warpzone` under the cwd `/` → EROFS on creating
+  `identity.key`. Already fixed in 84f8f22 (0.1.0+p5, versionCode 10005,
+  built and published 18:07 UTC): `android_main` sets `WARPZONE_HOME` to
+  `<files>/warpzone`. The report came in 21:35 UTC, most likely from the
+  p4 install not yet updated by Obtainium. Not verified on a device (no
+  device in this worker's gateway scope, no emulator under tools/).
+- Open: errors from `NetSession::new` are always local faults (network is
+  async), so they could go to the report API, but the game crate has no
+  hook into `crates/android/src/crash.rs`; worth adding a reporter hook.
