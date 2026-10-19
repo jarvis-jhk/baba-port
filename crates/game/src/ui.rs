@@ -189,6 +189,11 @@ impl Ui {
         (self.height - 480.0 * self.scale) / 2.0 + ly * self.scale
     }
 
+    /// Screen y → logical y (the inverse of [`Ui::y`]).
+    pub fn ly(&self, y: f32) -> f32 {
+        (y - (self.height - 480.0 * self.scale) / 2.0) / self.scale
+    }
+
     /// A filled rectangle in screen pixels.
     pub fn rect_px(&mut self, g: &Gfx, x: f32, y: f32, w: f32, h: f32, color: [u8; 4]) {
         self.quads.push(Quad {

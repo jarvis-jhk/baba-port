@@ -21,6 +21,7 @@ use super::{App, Mode};
 use crate::input::{Cmd, Input};
 use crate::join::{Lobby, Players, Source};
 use crate::menu::{Act, Item, Menu, MenuId, Style};
+use crate::osk;
 use crate::session::multi::{Cx, Multi};
 use crate::session::online::{
     NetGame, NetSide, Rep, SessionSettings, build_id, content_hash, init_chunks, mp_mode, net_mode,
@@ -368,34 +369,6 @@ impl App {
         }
     }
 
-    /// Text entry of the join code; true if it took the frame.
-    pub(super) fn online_text(&mut self, cmds: &[Cmd]) -> bool {
-        let Some((MenuId::Online(OnMenu::Code { text }), _)) = self.menus.last_mut() else {
-            return false;
-        };
-        for c in std::mem::take(&mut self.input.typed) {
-            if c == '\u{8}' {
-                text.pop();
-            } else if text.chars().count() < 12 && (c.is_ascii_alphanumeric() || c == '-') {
-                text.push(c.to_ascii_uppercase());
-            }
-        }
-        for c in cmds {
-            match c {
-                Cmd::Back => {
-                    self.menus.pop();
-                    return true;
-                }
-                Cmd::Confirm => {
-                    self.online_activate(OnAct::SubmitCode);
-                    return true;
-                }
-                _ => {}
-            }
-        }
-        true
-    }
-
     pub(super) fn build_online(&self, id: &OnMenu) -> Menu {
         let mut m = Menu::new(Style::List);
         m.top = 70.0;
@@ -426,11 +399,11 @@ impl App {
                 });
             }
             OnMenu::Code { text } => {
-                m.top = 150.0;
+                m.top = 60.0;
                 m.header.push("Enter the room code:".into());
                 m.header.push(format!("{text}_"));
-                m.item(Item::new("Join", Act::Online(OnAct::SubmitCode)));
-                m.item(Item::new(self.texts.get("return"), Act::Close));
+                let cancel = self.texts.get("cancel");
+                osk::add_rows(&mut m, osk::Charset::Code, false, "Join", &cancel);
             }
             OnMenu::Rooms => {
                 m.top = 40.0;

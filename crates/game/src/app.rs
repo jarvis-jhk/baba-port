@@ -19,6 +19,7 @@ use crate::input::{Capture, Captured, Cmd, Input, key_name, pad_name};
 use crate::join::{Lobby, Source};
 use crate::lang::Texts;
 use crate::menu::{Act, Item, Menu, MenuId, Slider, Style};
+use crate::osk;
 use crate::play::{Current, Env, Play};
 use crate::session::multi::Cx;
 use crate::session::saves::ExtraSlots;
@@ -31,6 +32,7 @@ pub mod editor_ui;
 pub mod extras;
 use extras::{ExtAct, ExtMenu};
 pub mod online;
+mod prompt;
 
 /// Logic rate (the original's engine frame rate).
 pub const TICK_HZ: f64 = 60.0;
@@ -127,6 +129,8 @@ pub struct App {
     intro_next: bool,
     /// Frames a key has been held during the intro (hold to skip).
     hold: u32,
+    /// The on-screen keyboard's shift (slot names; one key, then off).
+    osk_shift: bool,
     /// Frames since the last auto turn (LEVEL IS AUTO).
     auto_t: u32,
     /// Menu slide-in: the top menu last seen and its offset (logical px).
@@ -387,6 +391,7 @@ impl App {
             cut_tex: None,
             intro_next: false,
             hold: 0,
+            osk_shift: false,
             slide_top: None,
             slide: (0.0, 0.0),
             auto_t: 0,
@@ -485,7 +490,10 @@ impl App {
                     l.event(e)
                 }
             }
-            _ => self.input.event(e, &self.profile.settings),
+            _ => {
+                self.input.text_entry = self.prompt_text().is_some();
+                self.input.event(e, &self.profile.settings)
+            }
         }
     }
 
@@ -513,7 +521,7 @@ impl App {
                 _ => None,
             };
         };
-        if matches!(id, MenuId::Waiting | MenuId::Rename { .. }) {
+        if matches!(id, MenuId::Waiting) {
             return None;
         }
         let menu = self.build_menu(&id);
@@ -635,37 +643,8 @@ impl App {
         if matches!(self.menus.last(), Some((MenuId::Waiting, _))) && self.input.capture.is_none() {
             self.menus.pop();
         }
-        // Text entry (slot names).
-        if let Some((MenuId::Rename { slot, text }, _)) = self.menus.last_mut() {
-            let slot = *slot;
-            for c in std::mem::take(&mut self.input.typed) {
-                if c == '\u{8}' {
-                    text.pop();
-                } else if text.chars().count() < 16 && (c.is_alphanumeric() || c == ' ') {
-                    text.push(c);
-                }
-            }
-            for c in cmds {
-                match c {
-                    Cmd::Back => {
-                        self.menus.pop();
-                        return;
-                    }
-                    Cmd::Confirm => {
-                        if let Some((MenuId::Rename { text, .. }, _)) = self.menus.pop()
-                            && !text.trim().is_empty()
-                        {
-                            self.profile.settings.set_slot_name(slot, text.trim());
-                            self.profile.save_settings();
-                        }
-                        return;
-                    }
-                    _ => {}
-                }
-            }
-            return;
-        }
-        if self.ext_text(cmds) || self.online_text(cmds) {
+        // Text prompts (slot names, level and room codes).
+        if self.prompt_tick(cmds) {
             return;
         }
         self.input.typed.clear();
@@ -1744,12 +1723,19 @@ impl App {
             }
             MenuId::Rename { text, .. } => {
                 let mut m = Menu::new(Style::List);
-                m.top = 150.0;
+                m.top = 60.0;
                 m.header.push(
                     t.opt("slot_rename")
                         .unwrap_or_else(|| "Change slot name".into()),
                 );
                 m.header.push(format!("{text}_"));
+                osk::add_rows(
+                    &mut m,
+                    osk::Charset::Name,
+                    self.osk_shift,
+                    "OK",
+                    &t.get("cancel"),
+                );
                 m
             }
             MenuId::Waiting => {
@@ -1972,6 +1958,7 @@ impl App {
             Act::Editor(a) => self.ed_activate(a),
             Act::Multiplayer => self.open_lobby(),
             Act::Online(a) => self.online_activate(a),
+            Act::Osk(k) => self.osk_key(k),
             Act::LeaveGame => {}
         }
     }
@@ -2258,18 +2245,18 @@ impl App {
                     self.texts.get("main_version"),
                     env!("CARGO_PKG_VERSION")
                 );
-                // At the left edge on narrow screens too.
+                // At the left edge on narrow screens too, clear of the
+                // buttons: in the band under the canvas (1:1), else at the
+                // top (4:3, where the buttons reach the bottom).
                 let mut corner = ui.edge(false, TITLE_SPAN);
-                corner.text(
-                    g,
-                    Some(&self.texts),
-                    &ver,
-                    6.0,
-                    458.0,
-                    14.0,
-                    white,
-                    Align::Left,
-                );
+                let y = if !ui.narrow() {
+                    458.0
+                } else if corner.height - corner.y(480.0) >= 20.0 * corner.scale {
+                    corner.ly(corner.height) - 22.0
+                } else {
+                    corner.ly(0.0) + 6.0
+                };
+                corner.text(g, Some(&self.texts), &ver, 6.0, y, 14.0, white, Align::Left);
                 ui.quads.append(&mut corner.quads);
             }
             Mode::Credits(c) => c.draw(ui, g, &self.texts, wob),

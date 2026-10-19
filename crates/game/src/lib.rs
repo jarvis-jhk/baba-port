@@ -10,6 +10,7 @@
 //! | [`play`] | a play session: level tree, map loading, entering, winning, unlock animations |
 //! | [`scene`] | sim level → tile scene (units, icons, paths, backgrounds) |
 //! | [`menu`] | generic menu grid |
+//! | [`osk`] | on-screen keyboard for slot names and level/room codes |
 //! | [`input`] | bindings, key repeat, rebinding capture |
 //! | [`audio`] | music selection, turn sounds, volumes |
 //! | [`sounds`] | sound effects by name from the install |
@@ -45,6 +46,7 @@ pub mod lang;
 pub mod level_view;
 pub mod levelcodes;
 pub mod menu;
+pub mod osk;
 pub mod overlays;
 pub mod packs;
 pub mod pixelfont;

@@ -156,8 +156,12 @@ pure-Rust provider (`docs/platform-android.md` "TLS without ring");
 `baba-net`'s `tls_check` example, cross-built, fetched the public Warpzone
 server's info over HTTPS under qemu.
 
-Still open: a screenshot/cover for the port listing, a layout that uses
-the full height of 4:3/1:1 screens for the title and HUD (M5), real
+Text prompts (slot name, level code, room code) have an on-screen
+keyboard driven by the pad (2026-10-19; `docs/game-flow.md`). On the
+title the version line sits in the band under the canvas on 1:1 and at
+the top on 4:3, clear of the buttons.
+
+Still open: a screenshot/cover for the port listing, real
 KMSDRM hardware and the device's SDL2/gptokeyb (the final `gameboy`
 check).
 

@@ -1,0 +1,68 @@
+# M10: the on-screen keyboard of the text prompts (crate::osk), by pad and
+# by touch: a level code typed with the pad (B deletes, B on an empty text
+# cancels), the slot name typed by taps with the shift key, a code typed
+# on the keyboard while the keys are shown. Runs after 2-levels.drive.
+size 854x480
+idle 300
+expect state title menu=Main
+key down
+key right
+key enter
+expect state menu=Ext(PlayLevels)
+key down
+key down
+key enter
+expect state menu=Ext(GetLevels)
+key enter
+expect state menu=Ext(EnterCode
+shot 30-osk-code
+# Pad: 1 2 [3] → A, down to E → A.
+pad right 2
+pad a
+pad down
+pad a
+expect state text: "3E"
+pad y
+expect state text: "3"
+pad y
+pad y
+expect state menu=Ext(GetLevels)
+key escape
+expect state menu=Ext(PlayLevels)
+key down 2
+key enter
+expect state menu=Rename
+shot 31-osk-name
+# Touch: Shift b a b a, OK.
+tap 0.218 0.463
+tap 0.601 0.412
+tap 0.187 0.362
+tap 0.601 0.412
+tap 0.187 0.362
+expect state text: "Baba"
+tap 0.642 0.463
+expect state menu=Ext(PlayLevels)
+expect save settings slotnames 2 Baba
+# The keyboard: Space and WASD type, Enter submits.
+key enter
+expect state menu=Rename
+key w
+key a
+key space
+key d
+key 2
+expect state text: "wa d2"
+key backspace 4
+key d
+key enter
+expect save settings slotnames 2 wd
+# 4:3 and 1:1 (PortMaster): the keys still fit.
+key enter
+size 640x480
+wait 2
+shot 32-osk-640x480
+size 720x720
+wait 2
+shot 33-osk-720x720
+key escape
+expect state menu=Ext(PlayLevels)

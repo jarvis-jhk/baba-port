@@ -168,6 +168,15 @@ baba-port     (crates/game)       lib `baba_game`: platform-agnostic App; bin `b
   confirm, in credits back, on the boot card skip. In play, touches go to
   the platform's on-screen controls, which the entry point shows only
   while `App::wants_touch_controls()` (playing, no menu).
+- Text prompts outside the editor (slot name, level code, online room
+  code; `crate::osk`, `app/prompt.rs`) show an on-screen keyboard of menu
+  items (digits, letters, `-` for codes; Shift and Space for names; Del,
+  OK, Cancel), so pads and touch can fill them in. Pad: Confirm presses
+  the selected key, Undo deletes (cancels on an empty text), Pause
+  submits, Restart toggles shift, Back/Select cancels. While a prompt is
+  open, `Input::text_entry` makes keyboard keys type instead of running
+  their bindings (Space and WASD would otherwise confirm and move); Enter
+  submits, Escape cancels, arrows move over the keys.
 - List menus on screens narrower than 16:9 are drawn bigger, into the
   height the 854x480 canvas leaves free (`Menu::ui_for`; 854x480 and
   16:9 screens unchanged).

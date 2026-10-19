@@ -297,7 +297,7 @@ maintainer log: `NOTES.md` (JARVIS owns the project since 2026-10-18).
       Open: level/pack thumbnails on the pack list, report button
       (gated), "Erase saved data on slot", clipboard, custom
       `[levels_won]` key layout unconfirmed.
-- [ ] M10 📣 Platforms: Windows (Wine-checked), macOS (CI), Android (APK,
+- [x] M10 📣 Platforms: Windows (Wine-checked), macOS (CI), Android (APK,
       touch, tested on the tablet), PortMaster (aarch64, emulated).
       Pipelines proven with probes (`docs/platform.md`, `platform-*.md`):
       Android NativeActivity without Java/Gradle/JDK/build-tools/clang
@@ -337,15 +337,27 @@ maintainer log: `NOTES.md` (JARVIS owns the project since 2026-10-18).
       ad-hoc signed `.app` zip, smoke test of both slices); written, not
       run yet (`docs/platform-macos.md`). The old `macos.yml` is folded
       into `.github/workflows/build.yml`.
-      Next: title/HUD layout for 4:3/1:1 (M5), soft keyboard for slot
-      names, first CI run for macOS, the `gameboy` check (M12).
+      Closed 2026-10-19: macOS universal build green in CI (smoke test of
+      both slices); on-screen keyboard for the text prompts outside the
+      editor (slot name, level code, online room code; `crate::osk`,
+      `app/prompt.rs`): keys are menu items, so d-pad/A, taps and the
+      mouse work; Undo deletes (cancels when empty), Pause submits,
+      Restart is shift, Select/Escape cancels; a physical keyboard types
+      straight in (text-entry mode in `Input`: Space and WASD type instead
+      of confirming/moving, Enter submits). Title on 4:3/1:1: the version
+      line moved clear of the Multiplayer/Online buttons (band under the
+      canvas on 1:1, top-left on 4:3). Test `crates/game/tests/m9/3-osk.drive`
+      (pad, taps with shift, keyboard, 640x480 and 720x720 shots; run by
+      `scripts/dev/m9-test.sh`). Private APK 0.1.0+p3 (versionCode 10003)
+      published; not run on the tablet in this session (no device in the
+      worker's scope). Left for M12: the `gameboy` check.
       Launcher icon with Baba (2026-10-18): made at build time from the
       local install for private builds only (`scripts/android/private.sh`,
       `--game-icon`; releases keep the default icon); private builds also
       report panics/failed starts (`crash.rs`). versionCode scheme now
       ×100 (+ private counter). Not seen on a device yet (no device in this
       worker's scope); aapt2 reads the resources. `docs/platform-android.md`.
-- [ ] M11 Packaging, CI, README and player docs, no-game-data check.
+- [x] M11 Packaging, CI, README and player docs, no-game-data check.
       Public release only when the owner says so.
       Done 2026-10-18 (all local, nothing published or pushed):
       `scripts/package.sh [--verify] [--only …] [--bundle-sdl]
@@ -433,6 +445,12 @@ maintainer log: `NOTES.md` (JARVIS owns the project since 2026-10-18).
       three. Not done: the import on the tablet with a real Windows/Mac
       zip; arm64 Mach-O with chained fixups (future Mac builds) is not
       handled.
+      Closed 2026-10-19: every CI run packages and verifies all five
+      archives (`package.sh --only <p> --verify` per platform job: Linux,
+      Windows under Wine, Android, PortMaster under qemu; macOS smoke test
+      and `codesign --verify`; `--checks-only` over all archives with the
+      no-game-data check and the descriptor), green on 560cd34 and later.
+      v0.1.0 stays a prerelease; a full release waits for the owner.
 - [ ] M12 Final check on the `gameboy` handheld (only after everything else).
 
 ## Workstreams in flight

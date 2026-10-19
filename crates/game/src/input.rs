@@ -146,6 +146,11 @@ pub struct Input {
     queue: Vec<Cmd>,
     /// Raw characters typed (text entry).
     pub typed: Vec<char>,
+    /// A text prompt is open (set by the app before each event): keys
+    /// type (Enter as `'\n'`) instead of running their bound actions;
+    /// arrows still move and Escape / Back still go back.
+    pub text_entry: bool,
+    shift_held: bool,
     pub capture: Option<Capture>,
     pub captured: Option<Captured>,
     stick: [i8; 2],
@@ -204,6 +209,37 @@ impl Input {
                     } else {
                         self.capture = None;
                     }
+                    return;
+                }
+                if *key == Key::Shift {
+                    self.shift_held = *down;
+                }
+                if *down && self.text_entry {
+                    match key {
+                        Key::Up => self.press_dir(1, key_src(*key), delay),
+                        Key::Down => self.press_dir(3, key_src(*key), delay),
+                        Key::Left => self.press_dir(2, key_src(*key), delay),
+                        Key::Right => self.press_dir(0, key_src(*key), delay),
+                        Key::Escape | Key::Back => self.queue.push(Cmd::Back),
+                        Key::Enter => self.typed.push('\n'),
+                        Key::Space => self.typed.push(' '),
+                        Key::Backspace => self.typed.push('\u{8}'),
+                        _ => {
+                            if let Some(c) =
+                                char::from_u32(code as u32).filter(|c| c.is_ascii_alphanumeric())
+                            {
+                                self.typed.push(if self.shift_held {
+                                    c.to_ascii_uppercase()
+                                } else {
+                                    c
+                                });
+                            }
+                        }
+                    }
+                    return;
+                }
+                if !*down && self.text_entry {
+                    self.release(key_src(*key));
                     return;
                 }
                 if *down {

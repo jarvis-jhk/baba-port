@@ -98,6 +98,8 @@ pub enum Act {
     LeaveGame,
     /// Online actions (`app::online`).
     Online(crate::app::online::OnAct),
+    /// A key of the on-screen keyboard in a text prompt (`osk`).
+    Osk(crate::osk::OskKey),
 }
 
 #[derive(Clone, Debug)]

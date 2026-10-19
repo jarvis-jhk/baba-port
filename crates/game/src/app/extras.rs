@@ -14,11 +14,11 @@ use baba_render::{RegionId, RgbaImage};
 
 use super::{App, Mode, Then};
 use crate::import;
-use crate::input::Cmd;
 use crate::levelcodes::net::{Job, JobKind, JobResult, Server};
 use crate::levelcodes::store::{self, TEMP};
 use crate::levelcodes::{self, LcError, ListPage};
 use crate::menu::{Act, Item, Menu, MenuId, Style};
+use crate::osk;
 use crate::packs::{self, LevelEntry};
 use crate::play::{Env, Play, SingleLevel};
 use crate::ui::{Align, Ui};
@@ -238,34 +238,6 @@ impl App {
         }
     }
 
-    /// Text entry for the code screen; true if it took the frame.
-    pub(super) fn ext_text(&mut self, cmds: &[Cmd]) -> bool {
-        let Some((MenuId::Ext(ExtMenu::EnterCode { text }), _)) = self.menus.last_mut() else {
-            return false;
-        };
-        for c in std::mem::take(&mut self.input.typed) {
-            if c == '\u{8}' {
-                text.pop();
-            } else if text.chars().count() < 9 && (c.is_ascii_alphanumeric() || c == '-') {
-                text.push(c.to_ascii_uppercase());
-            }
-        }
-        for c in cmds {
-            match c {
-                Cmd::Back => {
-                    self.menus.pop();
-                    return true;
-                }
-                Cmd::Confirm => {
-                    self.ext_activate(ExtAct::SubmitCode);
-                    return true;
-                }
-                _ => {}
-            }
-        }
-        true
-    }
-
     /// First launch: offer the import when an original save with progress
     /// exists. True if the offer is shown.
     pub(super) fn ext_offer_import(&mut self) -> bool {
@@ -468,10 +440,10 @@ impl App {
                 m.item(Item::new(t.get("return"), Act::Close));
             }
             ExtMenu::EnterCode { text } => {
-                m.top = 160.0;
+                m.top = 60.0;
                 m.header.push(t.get("namegiving_downloadcode"));
                 m.header.push(format!("{text}_"));
-                m.footer.push("Enter: download    Escape: back".into());
+                osk::add_rows(&mut m, osk::Charset::Code, false, "OK", &t.get("cancel"));
             }
             ExtMenu::Featured { page } => {
                 m.top = 14.0;

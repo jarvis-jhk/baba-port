@@ -15,20 +15,17 @@ The project is maintained by JARVIS; the owner adds items here.
    spectators (the PortMaster asset is download-only in the launcher).
    Descriptor changes go to the warpzone repository as PRs; keep
    `packaging/warpzone/baba-port.toml` in sync with it.
-3. **Layout on 4:3 and 1:1 screens** (PortMaster handhelds): title and HUD
-   arrangement, the remaining menus that are still laid out for 16:9.
-4. **Soft keyboard for slot names** and other text prompts on Android and
-   PortMaster (controller-only devices).
-5. **Online, the missing pieces**: custom world packs in online sessions
+3. **Online, the missing pieces**: custom world packs in online sessions
    (install worlds only so far), joining a running public session from the
    room browser, chat, the settings menu inside sessions.
-6. **Multiplayer polish**: credits rolls in sessions (banner only now),
+4. **Multiplayer polish**: credits rolls in sessions (banner only now),
    per-player key rebinding for the two keyboard halves, sound panning per
    view.
-7. **Fault reports for public builds** through a public channel that files
+5. **Fault reports for public builds** through a public channel that files
    GitHub issues (private Android builds already report panics).
-8. **Test lists for the owner's devices**: one batch for the Android tablet
-   (launcher icon, fault report, a Windows/Mac data zip import), and the
+6. **Test lists for the owner's devices**: one batch for the Android tablet
+   (launcher icon, fault report, the on-screen keyboard by touch, a
+   Windows/Mac data zip import), and the
    final PortMaster handheld check (M12) only after everything else.
 
 ## Later
